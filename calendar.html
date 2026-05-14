@@ -381,7 +381,7 @@ function renderListView() {
 
 /* ====== 更新数据 ====== */
 // GitHub raw URL — 请替换为你的实际仓库路径
-const DATA_RAW_URL = 'https://raw.githubusercontent.com/qua1ia/gdevent/main/data/events-data.js';
+const DATA_URL = 'data/events-data.js';
 
 function fetchLatestData() {
   const btn = document.getElementById('updateBtn');
@@ -390,7 +390,7 @@ function fetchLatestData() {
   btn.textContent = '⏳ 更新中...';
   status.textContent = '正在从 GitHub 获取最新数据...';
   // 加时间戳防止缓存
-  const url = DATA_RAW_URL + '?t=' + Date.now();
+  const url = DATA_URL + '?t=' + Date.now();
   const s = document.createElement('script');
   s.src = url;
   s.onload = () => {
