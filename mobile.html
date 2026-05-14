@@ -1,0 +1,1015 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#667eea">
+    <title>广东赛事日历 - 移动版</title>
+    <!-- 数据文件：与 calendar.html 共用 -->
+    <script src="data/events-data.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+            background: #f5f7fa;
+            color: #333;
+            overflow-x: hidden;
+            padding-bottom: 70px;
+        }
+
+        /* 顶部导航 */
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .header h1 {
+            font-size: 20px;
+            font-weight: 600;
+            text-align: center;
+            margin-bottom: 10px;
+        }
+
+        .header-stats {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            font-size: 13px;
+            opacity: 0.9;
+        }
+
+        .header-stats span {
+            background: rgba(255,255,255,0.2);
+            padding: 4px 12px;
+            border-radius: 20px;
+        }
+
+        /* 更新栏 */
+        .update-bar {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 15px;
+            background: white;
+            border-bottom: 1px solid #e0e0e0;
+            font-size: 12px;
+            color: #666;
+        }
+
+        .update-bar button {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 5px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .update-bar button:disabled {
+            background: #999;
+            cursor: default;
+        }
+
+        .update-bar .status {
+            margin-left: auto;
+            font-size: 11px;
+            color: #999;
+        }
+
+        /* 视图切换 */
+        .view-tabs {
+            display: flex;
+            background: white;
+            border-bottom: 1px solid #e0e0e0;
+            position: sticky;
+            top: 67px;
+            z-index: 99;
+        }
+
+        .view-tab {
+            flex: 1;
+            padding: 12px;
+            text-align: center;
+            font-size: 14px;
+            color: #666;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s;
+        }
+
+        .view-tab.active {
+            color: #667eea;
+            border-bottom-color: #667eea;
+            font-weight: 600;
+        }
+
+        /* 筛选栏 */
+        .filter-bar {
+            display: flex;
+            gap: 8px;
+            padding: 10px 15px;
+            background: white;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .filter-bar::-webkit-scrollbar {
+            display: none;
+        }
+
+        .filter-chip {
+            flex-shrink: 0;
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-size: 13px;
+            background: #f0f0f0;
+            color: #666;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: none;
+            white-space: nowrap;
+        }
+
+        .filter-chip.active {
+            background: #667eea;
+            color: white;
+        }
+
+        /* 日历视图 */
+        .calendar-view {
+            display: none;
+            padding: 15px;
+        }
+
+        .calendar-view.active {
+            display: block;
+        }
+
+        .calendar-nav {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 15px;
+        }
+
+        .calendar-nav button {
+            background: white;
+            border: 1px solid #e0e0e0;
+            padding: 8px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            color: #667eea;
+            font-weight: 600;
+        }
+
+        .calendar-nav .month-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .calendar-grid {
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+
+        .calendar-weekdays {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            background: #f8f9fa;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .calendar-weekdays div {
+            padding: 10px;
+            text-align: center;
+            font-size: 12px;
+            color: #999;
+            font-weight: 600;
+        }
+
+        .calendar-days {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+        }
+
+        .calendar-day {
+            aspect-ratio: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            cursor: pointer;
+            border: 1px solid #f0f0f0;
+            transition: all 0.2s;
+            position: relative;
+        }
+
+        .calendar-day:hover {
+            background: #f8f9fa;
+        }
+
+        .calendar-day.today {
+            background: #667eea;
+            color: white;
+            border-radius: 8px;
+            font-weight: 600;
+        }
+
+        .calendar-day.has-event {
+            background: #fff3e0;
+        }
+
+        .calendar-day.has-event::after {
+            content: '';
+            position: absolute;
+            bottom: 4px;
+            width: 5px;
+            height: 5px;
+            background: #ff9800;
+            border-radius: 50%;
+        }
+
+        .calendar-day.empty {
+            background: #fafafa;
+        }
+
+        .event-dot {
+            width: 4px;
+            height: 4px;
+            border-radius: 50%;
+            margin-top: 2px;
+        }
+
+        /* 列表视图 */
+        .list-view {
+            display: none;
+            padding: 15px;
+        }
+
+        .list-view.active {
+            display: block;
+        }
+
+        .list-section {
+            margin-bottom: 20px;
+        }
+
+        .list-section-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 12px;
+            padding-left: 10px;
+            border-left: 4px solid #667eea;
+        }
+
+        .event-card {
+            background: white;
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 10px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .event-card:active {
+            transform: scale(0.98);
+        }
+
+        .event-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 8px;
+        }
+
+        .event-name {
+            font-size: 15px;
+            font-weight: 600;
+            color: #333;
+            flex: 1;
+            margin-right: 10px;
+        }
+
+        .event-type-badge {
+            flex-shrink: 0;
+            padding: 3px 10px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 600;
+            color: white;
+        }
+
+        .event-details {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            font-size: 13px;
+            color: #666;
+        }
+
+        .event-detail-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .event-detail-item::before {
+            content: '•';
+            color: #667eea;
+            font-weight: bold;
+        }
+
+        .event-card-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px solid #f0f0f0;
+        }
+
+        .event-city {
+            font-size: 12px;
+            color: #999;
+            background: #f5f5f5;
+            padding: 3px 10px;
+            border-radius: 10px;
+        }
+
+        .event-deadline {
+            font-size: 12px;
+            color: #ff9800;
+            font-weight: 600;
+        }
+
+        .event-deadline.urgent {
+            color: #f44336;
+        }
+
+        /* 底部导航 */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: white;
+            display: flex;
+            justify-content: space-around;
+            padding: 10px 0;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+            z-index: 1000;
+        }
+
+        .bottom-nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            cursor: pointer;
+            color: #999;
+            font-size: 11px;
+            padding: 5px 15px;
+            border: none;
+            background: none;
+            transition: color 0.3s;
+        }
+
+        .bottom-nav-item.active {
+            color: #667eea;
+        }
+
+        .bottom-nav-icon {
+            font-size: 20px;
+        }
+
+        /* 模态框 */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 2000;
+        }
+
+        .modal.active {
+            display: flex;
+            align-items: flex-end;
+        }
+
+        .modal-content {
+            background: white;
+            width: 100%;
+            max-height: 80vh;
+            border-radius: 20px 20px 0 0;
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .modal-title {
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .modal-close {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background: #f0f0f0;
+            border: none;
+            font-size: 18px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .event-modal-body {
+            line-height: 1.8;
+        }
+
+        .event-info-row {
+            display: flex;
+            margin-bottom: 12px;
+            font-size: 14px;
+        }
+
+        .event-info-label {
+            color: #999;
+            width: 80px;
+            flex-shrink: 0;
+        }
+
+        .event-info-value {
+            color: #333;
+            flex: 1;
+        }
+
+        .event-link-button {
+            display: block;
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            text-align: center;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            margin-top: 20px;
+            border: none;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        /* 空状态 */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #999;
+        }
+
+        .empty-state-icon {
+            font-size: 60px;
+            margin-bottom: 20px;
+        }
+
+        .empty-state-text {
+            font-size: 16px;
+        }
+    </style>
+</head>
+<body>
+    <!-- 顶部导航 -->
+    <div class="header">
+        <h1>🏃 广东赛事日历</h1>
+        <div class="header-stats">
+            <span id="totalEvents">共 0 场赛事</span>
+            <span id="upcomingEvents">近期 0 场</span>
+        </div>
+    </div>
+
+    <!-- 更新栏 -->
+    <div class="update-bar">
+        <button id="updateBtn" onclick="fetchLatestData()">🔄 更新数据</button>
+        <span class="status" id="updateStatus">点击按钮更新赛事数据</span>
+    </div>
+
+    <!-- 视图切换 -->
+    <div class="view-tabs">
+        <div class="view-tab active" data-view="list">📋 列表</div>
+        <div class="view-tab" data-view="calendar">📅 日历</div>
+    </div>
+
+    <!-- 筛选栏 -->
+    <div class="filter-bar" id="filterBar">
+        <button class="filter-chip active" data-filter="all">全部</button>
+        <button class="filter-chip" data-filter="triathlon">铁人三项</button>
+        <button class="filter-chip" data-filter="openwater">公开水域</button>
+        <button class="filter-chip" data-filter="trailrun">越野跑</button>
+        <button class="filter-chip" data-filter="familyrun">亲子跑</button>
+        <button class="filter-chip" data-filter="marathon">马拉松</button>
+        <button class="filter-chip" data-filter="cycling">骑行</button>
+        <button class="filter-chip" data-filter="roadrun">路跑</button>
+        <button class="filter-chip" data-filter="orienteering">定向</button>
+    </div>
+
+    <!-- 列表视图 -->
+    <div class="list-view active" id="listView"></div>
+
+    <!-- 日历视图 -->
+    <div class="calendar-view" id="calendarView">
+        <div class="calendar-nav">
+            <button id="prevMonth">‹ 上月</button>
+            <div class="month-title" id="monthTitle"></div>
+            <button id="nextMonth">下月 ›</button>
+        </div>
+        <div class="calendar-grid">
+            <div class="calendar-weekdays">
+                <div>日</div>
+                <div>一</div>
+                <div>二</div>
+                <div>三</div>
+                <div>四</div>
+                <div>五</div>
+                <div>六</div>
+            </div>
+            <div class="calendar-days" id="calendarDays"></div>
+        </div>
+    </div>
+
+    <!-- 底部导航 -->
+    <div class="bottom-nav">
+        <button class="bottom-nav-item active" data-action="list">
+            <span class="bottom-nav-icon">📋</span>
+            <span>列表</span>
+        </button>
+        <button class="bottom-nav-item" data-action="calendar">
+            <span class="bottom-nav-icon">📅</span>
+            <span>日历</span>
+        </button>
+        <button class="bottom-nav-item" data-action="filter">
+            <span class="bottom-nav-icon">🔍</span>
+            <span>筛选</span>
+        </button>
+        <button class="bottom-nav-item" data-action="update">
+            <span class="bottom-nav-icon">🔄</span>
+            <span>更新</span>
+        </button>
+    </div>
+
+    <!-- 赛事详情弹窗 -->
+    <div class="modal event-modal" id="eventModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-title">赛事详情</div>
+                <button class="modal-close" onclick="closeModal('eventModal')">×</button>
+            </div>
+            <div class="event-modal-body" id="eventDetailBody"></div>
+        </div>
+    </div>
+
+    <script>
+        // 全局状态
+        let currentView = 'list';
+        let currentFilter = 'all';
+        let currentCityFilter = 'all';
+        let currentDate = new Date();
+        let touchStartY = 0;
+        let touchEndY = 0;
+
+        // GitHub raw URL — 请替换为你的实际仓库路径
+        const DATA_RAW_URL = 'https://raw.githubusercontent.com/YOUR_USERNAME/YOUR_REPO/main/gd-events/data/events-data.js';
+
+        // 初始化
+        function init() {
+            updateStats();
+            renderListView();
+            setupEventListeners();
+        }
+
+        // 更新统计
+        function updateStats() {
+            const today = new Date();
+            const total = EVENTS.length;
+            const upcoming = EVENTS.filter(e => new Date(e.date) >= today).length;
+            document.getElementById('totalEvents').textContent = `共 ${total} 场赛事`;
+            document.getElementById('upcomingEvents').textContent = `近期 ${upcoming} 场`;
+        }
+
+        // 设置事件监听
+        function setupEventListeners() {
+            // 视图切换
+            document.querySelectorAll('.view-tab').forEach(tab => {
+                tab.addEventListener('click', () => {
+                    switchView(tab.dataset.view);
+                });
+            });
+
+            // 底部导航
+            document.querySelectorAll('.bottom-nav-item').forEach(item => {
+                item.addEventListener('click', () => {
+                    const action = item.dataset.action;
+                    if (action === 'list' || action === 'calendar') {
+                        switchView(action);
+                    } else if (action === 'filter') {
+                        // 滚动到筛选栏
+                        document.getElementById('filterBar').scrollIntoView({ behavior: 'smooth' });
+                    } else if (action === 'update') {
+                        fetchLatestData();
+                    }
+                });
+            });
+
+            // 筛选栏
+            document.querySelectorAll('.filter-chip').forEach(chip => {
+                chip.addEventListener('click', () => {
+                    document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+                    chip.classList.add('active');
+                    currentFilter = chip.dataset.filter;
+                    if (currentView === 'list') {
+                        renderListView();
+                    } else {
+                        renderCalendar();
+                    }
+                });
+            });
+
+            // 日历导航
+            document.getElementById('prevMonth').addEventListener('click', () => {
+                currentDate.setMonth(currentDate.getMonth() - 1);
+                renderCalendar();
+            });
+
+            document.getElementById('nextMonth').addEventListener('click', () => {
+                currentDate.setMonth(currentDate.getMonth() + 1);
+                renderCalendar();
+            });
+        }
+
+        // 切换视图
+        function switchView(view) {
+            currentView = view;
+            
+            // 更新标签
+            document.querySelectorAll('.view-tab').forEach(tab => {
+                tab.classList.toggle('active', tab.dataset.view === view);
+            });
+
+            // 更新底部导航
+            document.querySelectorAll('.bottom-nav-item').forEach(item => {
+                item.classList.toggle('active', item.dataset.action === view);
+            });
+
+            // 显示对应视图
+            document.getElementById('listView').classList.toggle('active', view === 'list');
+            document.getElementById('calendarView').classList.toggle('active', view === 'calendar');
+
+            if (view === 'calendar') {
+                renderCalendar();
+            } else {
+                renderListView();
+            }
+        }
+
+        // 渲染列表视图
+        function renderListView() {
+            const container = document.getElementById('listView');
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+
+            let filteredEvents = EVENTS.filter(e => {
+                const typeMatch = currentFilter === 'all' || e.type === currentFilter;
+                const cityMatch = currentCityFilter === 'all' || e.city === currentCityFilter;
+                return typeMatch && cityMatch && new Date(e.date) >= today;
+            });
+
+            // 按日期排序
+            filteredEvents.sort((a, b) => a.date.localeCompare(b.date));
+
+            if (filteredEvents.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">📭</div>
+                        <div class="empty-state-text">暂无符合条件的赛事</div>
+                    </div>
+                `;
+                return;
+            }
+
+            // 按月份分组
+            const grouped = {};
+            filteredEvents.forEach(event => {
+                const month = event.date.substring(0, 7);
+                if (!grouped[month]) {
+                    grouped[month] = [];
+                }
+                grouped[month].push(event);
+            });
+
+            let html = '';
+            for (const [month, events] of Object.entries(grouped)) {
+                const [year, monthNum] = month.split('-');
+                html += `<div class="list-section">
+                    <div class="list-section-title">${year}年${parseInt(monthNum)}月</div>`;
+                
+                events.forEach(event => {
+                    const typeConfig = TYPE_CONFIG[event.type] || {label: event.type, color: '#999'};
+                    const eventDate = new Date(event.date);
+                    const today = new Date();
+                    const daysUntilEvent = Math.ceil((eventDate - today) / (1000 * 60 * 60 * 24));
+
+                    let deadlineText = event.deadline || '';
+                    let deadlineClass = '';
+                    
+                    if (event.deadline && event.deadline !== '待公布' && event.deadline !== '待确认' && event.deadline !== '先报先得') {
+                        const deadlineDate = new Date(event.deadline.replace(' ', 'T'));
+                        const daysUntilDeadline = Math.ceil((deadlineDate - today) / (1000 * 60 * 60 * 24));
+                        if (daysUntilDeadline < 0) {
+                            deadlineClass = 'expired';
+                            deadlineText += ' ⛔已截止';
+                        } else if (daysUntilDeadline < 3) {
+                            deadlineClass = 'urgent';
+                            deadlineText += ' 🔴即将截止!';
+                        } else if (daysUntilDeadline < 7) {
+                            deadlineClass = 'soon';
+                            deadlineText += ' 🟡';
+                        }
+                    }
+                    
+                    html += `
+                        <div class="event-card" onclick="showEventDetail(${event.id})">
+                            <div class="event-card-header">
+                                <div class="event-name">${event.name}</div>
+                                <div class="event-type-badge" style="background: ${typeConfig.color}">${typeConfig.label}</div>
+                            </div>
+                            <div class="event-details">
+                                <div class="event-detail-item">📍 ${event.loc || event.city}</div>
+                                ${event.source ? `<div class="event-detail-item">📡 ${event.source}</div>` : ''}
+                            </div>
+                            <div class="event-card-footer">
+                                <div class="event-city">${event.city}</div>
+                                ${deadlineText ? `<div class="event-deadline ${deadlineClass}">⏰ ${deadlineText}</div>` : ''}
+                            </div>
+                            ${event.note ? `<div style="font-size: 11px; color: #999; margin-top: 5px;">${event.note}</div>` : ''}
+                        </div>
+                    `;
+                });
+                
+                html += '</div>';
+            }
+
+            container.innerHTML = html;
+        }
+
+        // 渲染日历视图
+        function renderCalendar() {
+            const year = currentDate.getFullYear();
+            const month = currentDate.getMonth();
+            
+            document.getElementById('monthTitle').textContent = `${year}年${month + 1}月`;
+
+            const firstDay = new Date(year, month, 1);
+            const startDay = firstDay.getDay() === 0 ? 6 : firstDay.getDay() - 1;
+            const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+            const container = document.getElementById('calendarDays');
+            container.innerHTML = '';
+
+            // 空白填充
+            for (let i = 0; i < startDay; i++) {
+                const empty = document.createElement('div');
+                empty.className = 'calendar-day empty';
+                container.appendChild(empty);
+            }
+
+            // 日期格子
+            const today = new Date();
+            for (let day = 1; day <= daysInMonth; day++) {
+                const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+                const dayEvents = EVENTS.filter(e => {
+                    const typeMatch = currentFilter === 'all' || e.type === currentFilter;
+                    const cityMatch = currentCityFilter === 'all' || e.city === currentCityFilter;
+                    return e.date === dateStr && typeMatch && cityMatch;
+                });
+
+                const dayEl = document.createElement('div');
+                dayEl.className = 'calendar-day';
+                
+                if (year === today.getFullYear() && month === today.getMonth() && day === today.getDate()) {
+                    dayEl.classList.add('today');
+                }
+                
+                if (dayEvents.length > 0) {
+                    dayEl.classList.add('has-event');
+                }
+
+                dayEl.innerHTML = `<div>${day}</div>`;
+                
+                if (dayEvents.length > 0) {
+                    dayEl.addEventListener('click', () => {
+                        showDayEvents(dayEvents);
+                    });
+                }
+
+                container.appendChild(dayEl);
+            }
+        }
+
+        // 显示日期事件
+        function showDayEvents(events) {
+            if (events.length === 1) {
+                showEventDetail(events[0].id);
+            } else {
+                let html = '<div style="padding: 10px 0;"><div style="font-weight:700;margin-bottom:12px;font-size:16px;">📅 共' + events.length + '场赛事</div>';
+                events.forEach(event => {
+                    const typeConfig = TYPE_CONFIG[event.type] || {label: event.type, color: '#999'};
+                    html += `
+                        <div class="event-card" onclick="closeModal('eventModal');setTimeout(()=>showEventDetail(${event.id}),300);">
+                            <div class="event-card-header">
+                                <div class="event-name">${event.name}</div>
+                                <div class="event-type-badge" style="background: ${typeConfig.color}">${typeConfig.label}</div>
+                            </div>
+                            <div style="font-size: 12px; color: #999; margin-top: 5px;">📍 ${event.loc || event.city}</div>
+                        </div>
+                    `;
+                });
+                html += '</div>';
+                
+                document.getElementById('eventDetailBody').innerHTML = html;
+                openModal('eventModal');
+            }
+        }
+
+        // 显示赛事详情
+        function showEventDetail(eventId) {
+            const event = EVENTS.find(e => e.id === eventId);
+            if (!event) return;
+            
+            const typeConfig = TYPE_CONFIG[event.type] || {label: event.type, color: '#999'};
+            const eventDate = new Date(event.date);
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            const daysUntilEvent = Math.ceil((eventDate - today) / (1000 * 60 * 60 * 24));
+
+            let deadlineText = event.deadline || '';
+            let deadlineClass = '';
+            
+            if (event.deadline && event.deadline !== '待公布' && event.deadline !== '待确认' && event.deadline !== '先报先得') {
+                const deadlineDate = new Date(event.deadline.replace(' ', 'T'));
+                const daysUntilDeadline = Math.ceil((deadlineDate - today) / (1000 * 60 * 60 * 24));
+                if (daysUntilDeadline < 0) {
+                    deadlineClass = 'expired';
+                    deadlineText += ' ⛔已截止';
+                } else if (daysUntilDeadline < 3) {
+                    deadlineClass = 'urgent';
+                    deadlineText += ' 🔴即将截止!';
+                } else if (daysUntilDeadline < 7) {
+                    deadlineClass = 'soon';
+                    deadlineText += ' 🟡';
+                }
+            }
+
+            let html = `
+                <div class="event-info-row">
+                    <div class="event-info-label">赛事名称</div>
+                    <div class="event-info-value" style="font-weight: 600; color: #333;">${event.name}</div>
+                </div>
+                <div class="event-info-row">
+                    <div class="event-info-label">赛事类型</div>
+                    <div class="event-info-value">
+                        <span style="background: ${typeConfig.color}; color: white; padding: 2px 10px; border-radius: 10px; font-size: 12px;">${typeConfig.label}</span>
+                    </div>
+                </div>
+                <div class="event-info-row">
+                    <div class="event-info-label">📍 地点</div>
+                    <div class="event-info-value">${event.loc || event.city}</div>
+                </div>
+                <div class="event-info-row">
+                    <div class="event-info-label">🏙 城市</div>
+                    <div class="event-info-value">${event.city}</div>
+                </div>
+                <div class="event-info-row">
+                    <div class="event-info-label">📅 时间</div>
+                    <div class="event-info-value">${event.date} (还有${daysUntilEvent}天)</div>
+                </div>
+            `;
+            
+            if (event.deadline) {
+                html += `
+                    <div class="event-info-row">
+                        <div class="event-info-label">⏰ 截止</div>
+                        <div class="event-info-value" style="color: ${deadlineClass === 'urgent' ? '#f44336' : deadlineClass === 'soon' ? '#ff9800' : '#333'}; font-weight: 600;">
+                            ${deadlineText}
+                        </div>
+                    </div>
+                `;
+            }
+            
+            if (event.source) {
+                html += `
+                    <div class="event-info-row">
+                        <div class="event-info-label">📡 来源</div>
+                        <div class="event-info-value">${event.source}</div>
+                    </div>
+                `;
+            }
+            
+            if (event.note) {
+                html += `
+                    <div class="event-info-row" style="margin-top: 10px; padding: 10px; background: #f5f5f5; border-radius: 8px;">
+                        <div class="event-info-label">📝 备注</div>
+                        <div class="event-info-value">${event.note}</div>
+                    </div>
+                `;
+            }
+
+            if (event.link) {
+                html += `<a href="${event.link}" target="_blank" class="event-link-button">📝 前往报名 →</a>`;
+            } else {
+                html += `<div class="event-link-button" style="background: #ccc; cursor: not-allowed;">报名链接待公布</div>`;
+            }
+
+            document.getElementById('eventDetailBody').innerHTML = html;
+            openModal('eventModal');
+        }
+
+        // 打开模态框
+        function openModal(modalId) {
+            document.getElementById(modalId).classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        // 关闭模态框
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.remove('active');
+            document.body.style.overflow = 'auto';
+        }
+
+        // 更新数据（从 GitHub raw 拉取最新 events-data.js）
+        function fetchLatestData() {
+            const btn = document.getElementById('updateBtn');
+            const status = document.getElementById('updateStatus');
+            btn.disabled = true;
+            btn.textContent = '⏳ 更新中...';
+            status.textContent = '正在从 GitHub 获取最新数据...';
+
+            const url = DATA_RAW_URL + '?t=' + Date.now();
+            const s = document.createElement('script');
+            s.src = url;
+            s.onload = () => {
+                btn.disabled = false;
+                btn.textContent = '✅ 更新完成';
+                status.textContent = '数据已更新 · ' + new Date().toLocaleTimeString('zh-CN');
+                updateStats();
+                if (currentView === 'list') renderListView();
+                else renderCalendar();
+                setTimeout(() => { btn.textContent = '🔄 更新数据'; }, 3000);
+            };
+            s.onerror = () => {
+                btn.disabled = false;
+                btn.textContent = '❌ 更新失败';
+                status.textContent = '更新失败，请检查 GitHub 配置或网络';
+                setTimeout(() => { btn.textContent = '🔄 更新数据'; }, 3000);
+            };
+            document.head.appendChild(s);
+        }
+
+        // 初始化
+        init();
+    </script>
+</body>
+</html>

@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>广东省户外赛事日历 2026</title>
+<!-- 数据文件：网页和移动版共用 -->
+<script src="data/events-data.js"></script>
+<style>
+:root {
+  --triathlon: #e74c3c; --openwater: #3498db; --trailrun: #27ae60;
+  --familyrun: #e67e22; --marathon: #9b59b6; --cycling: #1abc9c;
+  --roadrun: #f39c12; --orient: #ec4899;
+  --bg: #0f172a; --card: #1e293b; --border: #334155;
+  --text: #e2e8f0; --text2: #94a3b8; --today: #f59e0b;
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif; background:var(--bg); color:var(--text); min-height:100vh; }
+.header { padding:20px 28px 12px; border-bottom:1px solid var(--border); position:relative; }
+.header h1 { font-size:22px; font-weight:700; margin-bottom:3px; }
+.header p { color:var(--text2); font-size:13px; }
+.nav-row { display:flex; align-items:center; gap:12px; margin-top:12px; flex-wrap:wrap; }
+.nav-btn { background:var(--card); border:1px solid var(--border); color:var(--text); padding:7px 14px; border-radius:8px; cursor:pointer; font-size:13px; transition:background .2s; }
+.nav-btn:hover { background:#334155; }
+.nav-btn:disabled { opacity:.4; cursor:default; }
+.nav-btn.primary { background:#3b82f6; border-color:#3b82f6; color:#fff; }
+.month-label { font-size:18px; font-weight:600; min-width:160px; text-align:center; }
+.today-btn { margin-left:auto; font-size:12px; padding:5px 10px; }
+.filter-section { padding:10px 28px; border-bottom:1px solid var(--border); }
+.filter-label { font-size:11px; color:var(--text2); margin-bottom:6px; font-weight:600; text-transform:uppercase; letter-spacing:.5px; }
+.filter-row { display:flex; flex-wrap:wrap; gap:6px; }
+.filter-item { display:flex; align-items:center; gap:4px; font-size:11px; color:var(--text2); cursor:pointer; padding:3px 8px; border-radius:4px; transition:all .2s; border:1px solid transparent; }
+.filter-item:hover { background:var(--card); }
+.filter-item.disabled { opacity:.35; }
+.filter-dot { width:8px; height:8px; border-radius:50%; flex-shrink:0; }
+.view-toggle { display:flex; border-bottom:1px solid var(--border); }
+.view-toggle button { flex:1; padding:10px; background:none; border:none; color:var(--text2); font-size:14px; cursor:pointer; border-bottom:2px solid transparent; transition:all .2s; }
+.view-toggle button.active { color:var(--today); border-bottom-color:var(--today); font-weight:600; }
+.cal-grid { display:grid; grid-template-columns:repeat(7,1fr); gap:1px; padding:0 28px 20px; }
+.cal-cell { background:var(--card); min-height:90px; padding:4px; border-radius:4px; position:relative; font-size:12px; cursor:pointer; transition:background .15s; }
+.cal-cell:hover { background:#334155; }
+.cal-cell.other-month { opacity:.3; }
+.cal-cell.today { box-shadow:inset 0 0 0 2px var(--today); }
+.day-num { font-weight:700; font-size:12px; margin-bottom:2px; }
+.event-chip { font-size:10px; padding:1px 4px; border-radius:3px; margin-bottom:1px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; cursor:pointer; transition:opacity .15s; }
+.event-chip:hover { opacity:.8; }
+.chip-triathlon { background:rgba(231,76,60,.2); color:#e74c3c; }
+.chip-openwater { background:rgba(52,152,219,.2); color:#3498db; }
+.chip-trailrun { background:rgba(39,174,96,.2); color:#27ae60; }
+.chip-familyrun { background:rgba(230,126,34,.2); color:#e67e22; }
+.chip-marathon { background:rgba(155,89,182,.2); color:#9b59b6; }
+.chip-cycling { background:rgba(26,188,156,.2); color:#1abc9c; }
+.chip-roadrun { background:rgba(243,156,18,.2); color:#f39c12; }
+.chip-orient { background:rgba(236,72,153,.2); color:#ec4899; }
+.more-chip { font-size:10px; color:var(--text2); padding:1px 4px; cursor:pointer; }
+.more-chip:hover { color:var(--today); }
+.list-view { padding:16px 28px; display:none; }
+.list-month { font-size:15px; font-weight:700; color:var(--text2); border-bottom:1px solid var(--border); padding:10px 0 6px; margin-top:6px; }
+.list-item { display:flex; gap:12px; padding:10px 12px; background:var(--card); border-radius:8px; margin-bottom:8px; cursor:pointer; transition:background .15s; border-left:3px solid transparent; }
+.list-item:hover { background:#334155; }
+.list-date { text-align:center; min-width:44px; }
+.list-date .month { font-size:11px; color:var(--text2); }
+.list-date .day { font-size:20px; font-weight:700; }
+.list-info { flex:1; }
+.list-info h3 { font-size:14px; font-weight:600; margin-bottom:3px; }
+.list-info p { font-size:12px; color:var(--text2); margin-bottom:2px; }
+.list-badge { display:inline-block; font-size:10px; padding:1px 6px; border-radius:3px; margin-top:2px; }
+.list-city { font-size:11px; color:var(--text2); }
+.list-deadline { font-size:11px; margin-top:4px; }
+.list-deadline.urgent { color:#ef4444; font-weight:600; }
+.list-deadline.soon { color:#f59e0b; }
+.tooltip { position:fixed; background:#1e293b; border:1px solid var(--border); border-radius:8px; padding:12px; min-width:260px; max-width:340px; box-shadow:0 8px 30px rgba(0,0,0,.4); z-index:9999; display:none; }
+.tooltip.show { display:block; }
+.tooltip-close { position:absolute; right:8px; top:8px; background:none; border:none; color:var(--text2); font-size:16px; cursor:pointer; }
+.tooltip-title { font-size:14px; font-weight:700; margin-bottom:8px; padding-right:20px; line-height:1.4; }
+.tooltip-row { font-size:12px; color:var(--text2); margin-bottom:4px; }
+.tooltip-row .label { color:var(--text); font-weight:600; margin-right:6px; }
+.tooltip-link { display:block; margin-top:8px; padding:6px 0; text-align:center; background:#3b82f6; color:#fff; border-radius:6px; text-decoration:none; font-size:13px; font-weight:600; }
+.tooltip-link:hover { background:#2563eb; }
+.empty { text-align:center; padding:40px; color:var(--text2); font-size:13px; }
+.update-bar { display:flex; align-items:center; gap:10px; padding:8px 28px; background:var(--card); border-bottom:1px solid var(--border); font-size:12px; color:var(--text2); flex-wrap:wrap; }
+.update-bar button { background:#3b82f6; color:#fff; border:none; padding:5px 14px; border-radius:6px; cursor:pointer; font-size:12px; font-weight:600; }
+.update-bar button:disabled { background:#64748b; cursor:default; }
+.update-bar .status { margin-left:auto; }
+@media(max-width:640px) {
+  .header { padding:14px 16px 10px; }
+  .filter-section { padding:10px 16px; }
+  .cal-grid { padding:0 8px 16px; }
+  .list-view { padding:12px 16px; }
+  .update-bar { padding:8px 16px; }
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>🏃 广东省户外赛事日历 2026</h1>
+  <p id="statsLine">加载中...</p>
+  <div class="nav-row">
+    <button class="nav-btn" id="prevBtn" onclick="changeMonth(-1)">‹ 上月</button>
+    <div class="month-label" id="monthLabel">—</div>
+    <button class="nav-btn" id="nextBtn" onclick="changeMonth(1)">下月 ›</button>
+    <button class="nav-btn today-btn" onclick="goToday()">📅 今天</button>
+  </div>
+</div>
+
+<div class="update-bar">
+  <span>📡 数据文件：<code>data/events-data.js</code></span>
+  <button id="updateBtn" onclick="fetchLatestData()">🔄 更新数据</button>
+  <span class="status" id="updateStatus"></span>
+</div>
+
+<div class="filter-section">
+  <div class="filter-label">赛事类型</div>
+  <div class="filter-row" id="typeFilter"></div>
+</div>
+<div class="filter-section">
+  <div class="filter-label">举办城市</div>
+  <div class="filter-row" id="cityFilter"></div>
+</div>
+
+<div class="view-toggle">
+  <button class="active" id="calViewBtn" onclick="switchView('cal')">📅 日历</button>
+  <button id="listViewBtn" onclick="switchView('list')">📋 列表</button>
+</div>
+
+<div class="cal-grid" id="calGrid"></div>
+<div class="list-view" id="listView"></div>
+
+<div class="tooltip" id="tooltip">
+  <button class="tooltip-close" onclick="hideTooltip()">✕</button>
+  <div id="tooltipContent"></div>
+</div>
+
+<script>
+/* ====== 状态 ====== */
+let currentYear, currentMonth;
+let hiddenTypes = new Set();
+let hiddenCities = new Set();
+const today = new Date();
+currentYear = today.getFullYear();
+currentMonth = today.getMonth();
+
+/* ====== 初始化 ====== */
+function init() {
+  renderTypeFilter();
+  renderCityFilter();
+  renderCalendar();
+  updateStats();
+}
+
+function updateStats() {
+  const total = EVENTS.length;
+  const upcoming = EVENTS.filter(e => e.date >= today.toISOString().slice(0,10)).length;
+  document.getElementById('statsLine').textContent =
+    `共 ${total} 场赛事 · 当前显示 ${upcoming} 场即将进行`;
+}
+
+/* ====== 筛选 ====== */
+function renderTypeFilter() {
+  const el = document.getElementById('typeFilter');
+  el.innerHTML = '';
+  for (const [type, info] of Object.entries(TYPE_MAP)) {
+    const item = document.createElement('div');
+    item.className = 'filter-item' + (hiddenTypes.has(type)?' disabled':'');
+    item.innerHTML = `<span class="filter-dot" style="background:${info.color}"></span>${info.label}`;
+    item.onclick = () => {
+      hiddenTypes.has(type)? hiddenTypes.delete(type) : hiddenTypes.add(type);
+      renderTypeFilter(); renderCalendar();
+      if(document.getElementById('listView').style.display !== 'none') renderListView();
+    };
+    el.appendChild(item);
+  }
+}
+
+function renderCityFilter() {
+  const el = document.getElementById('cityFilter');
+  el.innerHTML = '';
+  const all = document.createElement('div');
+  all.className = 'filter-item city' + (hiddenCities.size === 0 ? '' : ' disabled');
+  all.textContent = '全部';
+  all.onclick = () => {
+    if(hiddenCities.size > 0){ hiddenCities.clear(); }
+    else { CITY_LIST.forEach(c => hiddenCities.add(c)); }
+    renderCityFilter(); renderCalendar();
+    if(document.getElementById('listView').style.display !== 'none') renderListView();
+  };
+  el.appendChild(all);
+  CITY_LIST.forEach(city => {
+    const item = document.createElement('div');
+    item.className = 'filter-item city' + (hiddenCities.has(city)?' disabled':'');
+    item.textContent = city;
+    item.onclick = () => {
+      hiddenCities.has(city)? hiddenCities.delete(city) : hiddenCities.add(city);
+      renderCityFilter(); renderCalendar();
+      if(document.getElementById('listView').style.display !== 'none') renderListView();
+    };
+    el.appendChild(item);
+  });
+}
+
+function filteredEvents() {
+  return EVENTS.filter(e => !hiddenTypes.has(e.type) && !hiddenCities.has(e.city));
+}
+
+/* ====== 视图切换 ====== */
+function changeMonth(d) {
+  currentMonth += d;
+  if(currentMonth > 11) { currentMonth = 0; currentYear++; }
+  if(currentMonth < 0) { currentMonth = 11; currentYear--; }
+  renderCalendar();
+}
+function goToday() {
+  currentYear = today.getFullYear();
+  currentMonth = today.getMonth();
+  renderCalendar();
+  if(document.getElementById('listView').style.display !== 'none') renderListView();
+}
+function switchView(v) {
+  document.getElementById('calViewBtn').classList.toggle('active', v === 'cal');
+  document.getElementById('listViewBtn').classList.toggle('active', v === 'list');
+  document.getElementById('calGrid').style.display = v === 'cal' ? '' : 'none';
+  document.getElementById('listView').style.display = v === 'list' ? '' : 'none';
+  if(v === 'list') renderListView();
+}
+
+/* ====== 日历渲染 ====== */
+function renderCalendar() {
+  const months = ['1月','2月','3月','4月','5月','6月','7月','8月','9月','10月','11月','12月'];
+  document.getElementById('monthLabel').textContent = currentYear + '年 ' + months[currentMonth];
+  const grid = document.getElementById('calGrid');
+  while(grid.children.length > 7) grid.removeChild(grid.lastChild);
+
+  const firstDay = new Date(currentYear, currentMonth, 1);
+  let startDay = firstDay.getDay(); if(startDay === 0) startDay = 7; startDay--;
+  const daysInMonth = new Date(currentYear, currentMonth+1, 0).getDate();
+  const daysInPrev = new Date(currentYear, currentMonth, 0).getDate();
+  const visible = filteredEvents();
+
+  for(let i = 0; i < 42; i++) {
+    const cell = document.createElement('div');
+    cell.className = 'cal-cell';
+    let dayNum, dateStr, isOther = false;
+
+    if(i < startDay) {
+      dayNum = daysInPrev - startDay + i + 1;
+      const pm = currentMonth === 0 ? 11 : currentMonth - 1;
+      const py = currentMonth === 0 ? currentYear - 1 : currentYear;
+      dateStr = py + '-' + String(pm+1).padStart(2,'0') + '-' + String(dayNum).padStart(2,'0');
+      isOther = true;
+    } else if(i - startDay >= daysInMonth) {
+      dayNum = i - startDay - daysInMonth + 1;
+      const nm = currentMonth === 11 ? 0 : currentMonth + 1;
+      const ny = currentMonth === 11 ? currentYear + 1 : currentYear;
+      dateStr = ny + '-' + String(nm+1).padStart(2,'0') + '-' + String(dayNum).padStart(2,'0');
+      isOther = true;
+    } else {
+      dayNum = i - startDay + 1;
+      dateStr = currentYear + '-' + String(currentMonth+1).padStart(2,'0') + '-' + String(dayNum).padStart(2,'0');
+    }
+
+    if(isOther) cell.classList.add('other-month');
+    if(dateStr === today.toISOString().slice(0,10)) cell.classList.add('today');
+
+    const dayEl = document.createElement('div');
+    dayEl.className = 'day-num';
+    dayEl.textContent = dayNum;
+    cell.appendChild(dayEl);
+
+    const dayEvents = visible.filter(e => e.date === dateStr);
+    const maxShow = 3;
+    dayEvents.slice(0, maxShow).forEach(ev => {
+      const chip = document.createElement('div');
+      const cls = (TYPE_MAP[ev.type] || {}).cls || '';
+      chip.className = 'event-chip chip-' + cls;
+      chip.textContent = (ev.city ? ev.city + '·' : '') + ev.name;
+      chip.onclick = (e) => { e.stopPropagation(); showTooltip(ev, e); };
+      cell.appendChild(chip);
+    });
+    if(dayEvents.length > maxShow) {
+      const more = document.createElement('div');
+      more.className = 'more-chip';
+      more.textContent = '+' + (dayEvents.length - maxShow) + ' 更多';
+      more.onclick = (e) => { e.stopPropagation(); showDayList(dateStr, dayEvents, e); };
+      cell.appendChild(more);
+    }
+
+    grid.appendChild(cell);
+  }
+}
+
+/* ====== 提示 ====== */
+function showTooltip(ev, e) {
+  const tip = document.getElementById('tooltip');
+  const info = TYPE_MAP[ev.type] || {};
+  let deadlineClass = ''; let deadlineText = ev.deadline || '';
+  if(ev.deadline && ev.deadline !== '待公布' && ev.deadline !== '待确认' && ev.deadline !== '先报先得') {
+    const dl = new Date(ev.deadline.replace(' ', 'T'));
+    const diff = (dl - today) / 86400000;
+    if(diff < 0) { deadlineClass = 'expired'; deadlineText += ' ⛔已截止'; }
+    else if(diff < 3) { deadlineClass = 'urgent'; deadlineText += ' 🔴即将截止!'; }
+    else if(diff < 7) { deadlineClass = 'soon'; deadlineText += ' 🟡'; }
+  }
+  let html = `<div class="tooltip-title"><span class="tooltip-type" style="background:${info.color || '#666'}20;color:${info.color || '#666'}">${info.label || ev.type}</span> ${ev.name}</div>`;
+  if(ev.loc) html += `<div class="tooltip-row"><span class="label">📍 地点</span>${ev.loc}</div>`;
+  html += `<div class="tooltip-row"><span class="label">🏙 城市</span>${ev.city}</div>`;
+  html += `<div class="tooltip-row"><span class="label">📅 时间</span>${ev.date}</div>`;
+  if(ev.deadline) html += `<div class="tooltip-row tooltip-deadline ${deadlineClass}"><span class="label">⏰ 截止</span>${deadlineText}</div>`;
+  if(ev.source) html += `<div class="tooltip-row"><span class="label">📡 来源</span>${ev.source}</div>`;
+  if(ev.note) html += `<div class="tooltip-row"><span class="label">📝 备注</span>${ev.note}</div>`;
+  if(ev.link) html += `<a class="tooltip-link" href="${ev.link}" target="_blank">🔗 前往报名 →</a>`;
+  document.getElementById('tooltipContent').innerHTML = html;
+  tip.classList.add('show');
+  const rect = (e && e.target) ? e.target.getBoundingClientRect() : { right:200, top:200 };
+  let left = (rect.right || 200) + 8, top = (rect.top || 200);
+  if(left + 320 > window.innerWidth) left = (rect.left || 200) - 320;
+  if(top + 300 > window.innerHeight) top = window.innerHeight - 310;
+  if(top < 10) top = 10;
+  tip.style.left = left + 'px';
+  tip.style.top = top + 'px';
+}
+
+function showDayList(dateStr, dayEvents, e) {
+  const tip = document.getElementById('tooltip');
+  let html = `<div style="font-weight:700;margin-bottom:8px">📅 ${dateStr} 共${dayEvents.length}场</div>`;
+  dayEvents.forEach(ev => {
+    const info = TYPE_MAP[ev.type] || {};
+    html += `<div style="padding:5px 0;border-bottom:1px solid var(--border);cursor:pointer" onclick="hideTooltip();setTimeout(()=>showTooltip(EVENTS.find(x=>x.id===${ev.id}),event)">`;
+    html += `<span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:${(info.color||'#666')};margin-right:5px"></span>`;
+    html += `<span style="font-size:12px">${ev.city}·${ev.name}</span>`;
+    html += `<div style="font-size:10px;color:var(--text2);margin-left:12px">${ev.loc||''}</div></div>`;
+  });
+  document.getElementById('tooltipContent').innerHTML = html;
+  tip.classList.add('show');
+  const rect = (e && e.target) ? e.target.getBoundingClientRect() : { right:200, top:200 };
+  tip.style.left = Math.min((rect.right||200)+8, window.innerWidth-330) + 'px';
+  tip.style.top = Math.min((rect.top||200), window.innerHeight-300) + 'px';
+}
+
+function hideTooltip() { document.getElementById('tooltip').classList.remove('show'); }
+document.addEventListener('click', (e) => {
+  if(!e.target.closest('.tooltip') && !e.target.closest('.event-chip') && !e.target.closest('.more-chip') && !e.target.closest('.list-item')) hideTooltip();
+});
+
+/* ====== 列表视图 ====== */
+function renderListView() {
+  const el = document.getElementById('listView');
+  const visible = filteredEvents().filter(e => e.date >= today.toISOString().slice(0,10));
+  visible.sort((a,b) => a.date.localeCompare(b.date));
+  if(visible.length === 0) {
+    el.innerHTML = '<div class="empty">暂无符合条件的赛事</div>';
+    return;
+  }
+  let html = '', lastMonth = '';
+  visible.forEach(ev => {
+    const m = ev.date.slice(0,7);
+    if(m !== lastMonth) {
+      const [y,mo] = m.split('-');
+      html += `<div class="list-month">${y}年${parseInt(mo)}月</div>`;
+      lastMonth = m;
+    }
+    const [dy,dm,dd] = ev.date.split('-');
+    let dlCls = '';
+    if(ev.deadline && ev.deadline !== '待公布' && ev.deadline !== '待确认' && ev.deadline !== '先报先得') {
+      const dl = new Date(ev.deadline.replace(' ','T'));
+      const diff = (dl - today) / 86400000;
+      if(diff < 3) dlCls = 'urgent';
+      else if(diff < 7) dlCls = 'soon';
+    }
+    const info = TYPE_MAP[ev.type] || {};
+    html += `<div class="list-item" onclick="showTooltip(EVENTS.find(x=>x.id===${ev.id}),event)">
+      <div class="list-date"><div class="month">${parseInt(dm)}月</div><div class="day">${parseInt(dd)}</div></div>
+      <div class="list-info"><h3>${ev.name}</h3><p>📍 ${ev.loc||ev.city}</p>
+        <span class="list-badge" style="background:${(info.color||'#666')}20;color:${info.color||'#666'}">${info.label||ev.type}</span>
+        <span class="list-city">${ev.city}</span>
+        ${ev.deadline ? `<div class="list-deadline ${dlCls}">⏰ 报名截止：${ev.deadline}</div>` : ''}
+      </div></div>`;
+  });
+  el.innerHTML = html;
+}
+
+/* ====== 更新数据 ====== */
+// GitHub raw URL — 请替换为你的实际仓库路径
+const DATA_RAW_URL = 'https://raw.githubusercontent.com/YOUR_USERNAME/YOUR_REPO/main/gd-events/data/events-data.js';
+
+function fetchLatestData() {
+  const btn = document.getElementById('updateBtn');
+  const status = document.getElementById('updateStatus');
+  btn.disabled = true;
+  btn.textContent = '⏳ 更新中...';
+  status.textContent = '正在从 GitHub 获取最新数据...';
+  // 加时间戳防止缓存
+  const url = DATA_RAW_URL + '?t=' + Date.now();
+  const s = document.createElement('script');
+  s.src = url;
+  s.onload = () => {
+    btn.disabled = false;
+    btn.textContent = '✅ 更新完成';
+    status.textContent = '数据已更新 · ' + new Date().toLocaleTimeString('zh-CN');
+    renderCalendar();
+    if(document.getElementById('listView').style.display !== 'none') renderListView();
+    updateStats();
+    setTimeout(() => { btn.textContent = '🔄 更新数据'; }, 3000);
+  };
+  s.onerror = () => {
+    btn.disabled = false;
+    btn.textContent = '❌ 更新失败';
+    status.textContent = '更新失败，请检查网络或 GitHub 配置';
+    setTimeout(() => { btn.textContent = '🔄 更新数据'; }, 3000);
+  };
+  document.head.appendChild(s);
+}
+
+/* ====== 启动 ====== */
+init();
+</script>
+</body>
+</html>
