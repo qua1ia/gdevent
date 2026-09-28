@@ -210,26 +210,32 @@
 
         .calendar-weekdays {
             display: grid;
-            grid-template-columns: repeat(7, 1fr);
+            /* 周一~周五压缩，周六日加宽（与 .calendar-days 一致） */
+            grid-template-columns: repeat(5, .58fr) 1.05fr 1.05fr;
             background: #f8f9fa;
             border-bottom: 1px solid #e0e0e0;
         }
 
         .calendar-weekdays div {
-            padding: 10px;
+            padding: 7px 0;
             text-align: center;
             font-size: 12px;
             color: #999;
             font-weight: 600;
         }
 
+        .calendar-weekdays div.wk {
+            color: #1a73c7;
+        }
+
         .calendar-days {
             display: grid;
-            grid-template-columns: repeat(7, 1fr);
+            grid-template-columns: repeat(5, .58fr) 1.05fr 1.05fr;
         }
 
         .calendar-day {
-            aspect-ratio: 1;
+            /* 用固定高度代替正方形，避免周末加宽后整行变高 */
+            min-height: 46px;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -250,6 +256,23 @@
             color: white;
             border-radius: 8px;
             font-weight: 600;
+        }
+
+        .calendar-day.wkend {
+            background: #f2f7ff;
+        }
+
+        .calendar-day.wkend.has-event {
+            background: #e3efff;
+        }
+
+        .calendar-day .ev-n {
+            position: absolute;
+            top: 2px;
+            right: 3px;
+            font-size: 10px;
+            color: #ff9800;
+            font-weight: 700;
         }
 
         .calendar-day.has-event {
@@ -566,13 +589,13 @@
         </div>
         <div class="calendar-grid">
             <div class="calendar-weekdays">
-                <div>日</div>
                 <div>一</div>
                 <div>二</div>
                 <div>三</div>
                 <div>四</div>
                 <div>五</div>
-                <div>六</div>
+                <div class="wk">六</div>
+                <div class="wk">日</div>
             </div>
             <div class="calendar-days" id="calendarDays"></div>
         </div>
@@ -866,16 +889,20 @@
 
                 const dayEl = document.createElement('div');
                 dayEl.className = 'calendar-day';
-                
+
+                // 列序：0=周一 … 5=周六 6=周日（周末列加宽高亮）
+                const col = (startDay + day - 1) % 7;
+                if (col >= 5) dayEl.classList.add('wkend');
+
                 if (year === today.getFullYear() && month === today.getMonth() && day === today.getDate()) {
                     dayEl.classList.add('today');
                 }
-                
+
                 if (dayEvents.length > 0) {
                     dayEl.classList.add('has-event');
                 }
 
-                dayEl.innerHTML = `<div>${day}</div>`;
+                dayEl.innerHTML = `<div>${day}</div>` + (dayEvents.length > 1 ? `<div class="ev-n">${dayEvents.length}</div>` : '');
                 
                 if (dayEvents.length > 0) {
                     dayEl.addEventListener('click', () => {

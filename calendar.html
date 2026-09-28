@@ -48,9 +48,15 @@ body { font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif
 .filter-item.disabled { opacity:.35; text-decoration:line-through; }
 .filter-dot { width:7px; height:7px; border-radius:50%; flex-shrink:0; }
 
-/* ===== 日历 ===== */
-.cal-grid { display:grid; grid-template-columns:repeat(7,1fr); gap:1px; padding:8px 18px 14px; }
+/* ===== 日历（周一~周五压缩、周六日加宽） ===== */
+.cal-head, .cal-grid { display:grid; grid-template-columns:repeat(5, .62fr) 1.19fr 1.19fr; gap:1px; }
+.cal-head { padding:6px 18px 0; }
+.cal-head div { text-align:center; font-size:11px; color:var(--text2); padding:2px 0; }
+.cal-head div.wk { color:#7dd3fc; font-weight:700; }
+.cal-grid { padding:1px 18px 14px; }
 .cal-cell { background:var(--card); min-height:72px; padding:3px; border-radius:4px; position:relative; font-size:12px; cursor:pointer; transition:background .15s; }
+.cal-cell.wkday { background:#1b2537; }
+.cal-cell.wkend { background:#22304d; }
 .cal-cell:hover { background:#334155; }
 .cal-cell.other-month { opacity:.3; }
 .cal-cell.today { box-shadow:inset 0 0 0 2px var(--today); }
@@ -102,8 +108,10 @@ body { font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif
   .topbar h1 { font-size:14px; }
   .topbar .stats { display:none; }
   .frow { padding:3px 12px; }
-  .cal-grid { padding:6px 6px 12px; }
-  .cal-cell { min-height:60px; }
+  .cal-head { padding:4px 6px 0; }
+  .cal-grid { padding:1px 6px 12px; }
+  .cal-cell { min-height:58px; }
+  .cal-cell.wkday { min-height:48px; }
   .list-view { padding:10px 12px; }
 }
 </style>
@@ -139,6 +147,9 @@ body { font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif
   </div>
 </div>
 
+<div class="cal-head">
+  <div>一</div><div>二</div><div>三</div><div>四</div><div>五</div><div class="wk">六</div><div class="wk">日</div>
+</div>
 <div class="cal-grid" id="calGrid"></div>
 <div class="list-view" id="listView"></div>
 
@@ -295,7 +306,10 @@ function renderCalendar() {
 
   for (let i = 0; i < 42; i++) {
     const cell = document.createElement('div');
-    cell.className = 'cal-cell';
+    // 列序：0=周一 … 5=周六 6=周日（周末列加宽、多显示赛事）
+    const col = i % 7;
+    const isWkend = col >= 5;
+    cell.className = 'cal-cell ' + (isWkend ? 'wkend' : 'wkday');
     let dayNum, dateStr, isOther = false;
 
     if (i < startDay) {
@@ -324,7 +338,7 @@ function renderCalendar() {
     cell.appendChild(dayEl);
 
     const dayEvents = visible.filter(e => e.date === dateStr);
-    const maxShow = 3;
+    const maxShow = isWkend ? 5 : 2;   // 周末列更宽，多显示几场
     dayEvents.slice(0, maxShow).forEach(ev => {
       const chip = document.createElement('div');
       const cls = (TYPE_MAP[ev.type] || {}).cls || '';
