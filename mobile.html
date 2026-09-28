@@ -128,6 +128,27 @@
             display: none;
         }
 
+        /* 省外快捷开关（独立于类型筛选） */
+        .out-chip {
+            flex-shrink: 0;
+            padding: 4px 12px;
+            border-radius: 16px;
+            font-size: 12px;
+            background: #e8f4fd;
+            color: #1a73c7;
+            border: 1px solid #bfe0f7;
+            cursor: pointer;
+            transition: all 0.3s;
+            white-space: nowrap;
+        }
+
+        .out-chip.off {
+            background: #f0f0f0;
+            color: #999;
+            border-color: #e0e0e0;
+            text-decoration: line-through;
+        }
+
         .filter-chip {
             flex-shrink: 0;
             padding: 4px 12px;
@@ -522,6 +543,7 @@
     <!-- 筛选栏 -->
     <div class="filter-bar" id="filterBar">
         <button class="filter-chip active" data-filter="all">全部</button>
+        <button class="out-chip" id="outChip" title="一键显示/隐藏省外赛事">🌏 省外</button>
         <button class="filter-chip" data-filter="triathlon">铁人三项</button>
         <button class="filter-chip" data-filter="openwater">公开水域</button>
         <button class="filter-chip" data-filter="trailrun">越野跑</button>
@@ -596,12 +618,17 @@
         let touchStartY = 0;
         let touchEndY = 0;
 
+        // 省外快捷开关（默认显示省外赛事）
+        const OUT_SET = new Set(window.OUT_PROVINCE_CITIES || []);
+        let showOut = true;
+
         // GitHub raw URL — 请替换为你的实际仓库路径
         const DATA_URL = 'data/events-data.js';
 
         // 初始化
         function init() {
             updateStats();
+            updateOutChip();
             renderListView();
             setupEventListeners();
         }
@@ -610,6 +637,15 @@
         function todayStr() {
             const d = new Date();
             return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+        }
+
+        // 省外开关按钮状态
+        function updateOutChip() {
+            const chip = document.getElementById('outChip');
+            if (!chip) return;
+            const n = EVENTS.filter(e => OUT_SET.has(e.city)).length;
+            chip.textContent = (showOut ? '🌏 省外 ' : '🚫 省外已隐藏 ') + n;
+            chip.classList.toggle('off', !showOut);
         }
 
         // 更新统计
@@ -643,6 +679,17 @@
                     }
                 });
             });
+
+            // 省外快捷开关（一键显示/隐藏省外赛事）
+            const outChip = document.getElementById('outChip');
+            if (outChip) {
+                outChip.addEventListener('click', () => {
+                    showOut = !showOut;
+                    updateOutChip();
+                    if (currentView === 'list') renderListView();
+                    else renderCalendar();
+                });
+            }
 
             // 筛选栏
             document.querySelectorAll('.filter-chip').forEach(chip => {
@@ -703,7 +750,8 @@
             let filteredEvents = EVENTS.filter(e => {
                 const typeMatch = currentFilter === 'all' || e.type === currentFilter;
                 const cityMatch = currentCityFilter === 'all' || e.city === currentCityFilter;
-                return typeMatch && cityMatch && e.date >= todayStr();
+                const outMatch = showOut || !OUT_SET.has(e.city);
+                return typeMatch && cityMatch && outMatch && e.date >= todayStr();
             });
 
             // 按日期排序
@@ -812,7 +860,8 @@
                 const dayEvents = EVENTS.filter(e => {
                     const typeMatch = currentFilter === 'all' || e.type === currentFilter;
                     const cityMatch = currentCityFilter === 'all' || e.city === currentCityFilter;
-                    return e.date === dateStr && typeMatch && cityMatch;
+                    const outMatch = showOut || !OUT_SET.has(e.city);
+                    return e.date === dateStr && typeMatch && cityMatch && outMatch;
                 });
 
                 const dayEl = document.createElement('div');
