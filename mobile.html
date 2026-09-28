@@ -710,7 +710,24 @@
         // 关注 / 不关注（localStorage 持久化，与桌面版共享）
         let FOLLOWS = {};
         try { FOLLOWS = JSON.parse(localStorage.getItem('gdevent.follows') || '{}') || {}; } catch (e) { FOLLOWS = {}; }
-        function saveFollows() { try { localStorage.setItem('gdevent.follows', JSON.stringify(FOLLOWS)); } catch (e) {} }
+        function saveFollows() {
+            try { localStorage.setItem('gdevent.follows', JSON.stringify(FOLLOWS)); } catch (e) {}
+            if (followChannel) followChannel.postMessage({ type: 'follows' });
+        }
+        // 跨标签页同步（calendar ↔ mobile 同时打开时实时同步）
+        function reloadFollows() {
+            try { FOLLOWS = JSON.parse(localStorage.getItem('gdevent.follows') || '{}') || {}; } catch (e) { FOLLOWS = {}; }
+            updateStats();
+            if (currentView === 'list') renderListView(); else renderCalendar();
+        }
+        window.addEventListener('storage', (e) => {
+            if (e.key === 'gdevent.follows' || e.key === null) reloadFollows();
+        });
+        let followChannel = null;
+        try {
+            followChannel = new BroadcastChannel('gdevent-follows');
+            followChannel.onmessage = (ev) => { if (ev.data && ev.data.type === 'follows') reloadFollows(); };
+        } catch (e) { /* 老浏览器不支持时走 storage 事件 */ }
         function followState(id) { return FOLLOWS[id] || ''; }
         function followRank(id) { const s = followState(id); return s === 'follow' ? 0 : s === 'ignore' ? 2 : 1; }
         function setFollow(id, st) {

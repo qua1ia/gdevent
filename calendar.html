@@ -28,8 +28,6 @@ body { font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif
 .btn.primary { background:#3b82f6; border-color:#3b82f6; color:#fff; }
 .btn.primary:hover { background:#2563eb; }
 .month-label { font-size:13px; font-weight:600; min-width:92px; text-align:center; }
-.btn.out-btn { color:#7dd3fc; border-color:#1e4c63; }
-.btn.out-btn.off { opacity:.45; text-decoration:line-through; color:var(--text2); }
 .seg { display:flex; border:1px solid var(--border); border-radius:6px; overflow:hidden; }
 .seg button { background:transparent; border:none; color:var(--text2); font-size:12px; padding:4px 10px; cursor:pointer; transition:background .15s; }
 .seg button.active { background:#3b82f6; color:#fff; font-weight:600; }
@@ -142,7 +140,6 @@ body { font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif
     <div class="month-label" id="monthLabel">—</div>
     <button class="btn" id="nextBtn" onclick="changeMonth(1)">›</button>
     <button class="btn" onclick="goToday()">今天</button>
-    <button class="btn out-btn" id="outBtn" onclick="toggleOut()" title="一键显示/隐藏省外赛事">🌏 省外</button>
     <div class="seg">
       <button class="active" id="calViewBtn" onclick="switchView('cal')">日历</button>
       <button id="listViewBtn" onclick="switchView('list')">列表</button>
@@ -189,7 +186,10 @@ const OUT_SET = new Set(OUT_CITIES);
 /* ===== 关注 / 不关注（localStorage 持久化，与移动版共享） ===== */
 let FOLLOWS = {};
 try { FOLLOWS = JSON.parse(localStorage.getItem('gdevent.follows') || '{}') || {}; } catch (e) { FOLLOWS = {}; }
-function saveFollows() { try { localStorage.setItem('gdevent.follows', JSON.stringify(FOLLOWS)); } catch (e) {} }
+function saveFollows() {
+  try { localStorage.setItem('gdevent.follows', JSON.stringify(FOLLOWS)); } catch (e) {}
+  if (followChannel) followChannel.postMessage({ type: 'follows' });
+}
 function followState(id) { return FOLLOWS[id] || ''; }
 function followRank(id) { const s = followState(id); return s === 'follow' ? 0 : s === 'ignore' ? 2 : 1; }
 function setFollow(id, st) {
@@ -230,7 +230,6 @@ function cityHidden(city) {
 function init() {
   renderTypeFilter();
   renderCityFilter();
-  updateOutBtn();
   renderCalendar();
   updateStats();
 }
@@ -289,24 +288,24 @@ function renderCityFilter() {
   });
 }
 
-/* 「省外」快捷开关：与城市筛选里的「省外」项共用同一状态 */
-function toggleOut() {
-  hiddenCities.has(OUT_KEY) ? hiddenCities.delete(OUT_KEY) : hiddenCities.add(OUT_KEY);
+/* ===== 跨标签页同步关注状态（calendar ↔ mobile 同时打开时实时同步） ===== */
+function reloadFollows() {
+  try { FOLLOWS = JSON.parse(localStorage.getItem('gdevent.follows') || '{}') || {}; } catch (e) { FOLLOWS = {}; }
   refresh();
+  updateStats();
 }
-function updateOutBtn() {
-  const btn = document.getElementById('outBtn');
-  if (!btn) return;
-  const n = EVENTS.filter(e => isOutProvince(e.city)).length;
-  const hidden = hiddenCities.has(OUT_KEY);
-  btn.textContent = (hidden ? '🚫 省外已隐藏 ' : '🌏 省外 ') + n;
-  btn.classList.toggle('off', hidden);
-}
+window.addEventListener('storage', (e) => {
+  if (e.key === 'gdevent.follows' || e.key === null) reloadFollows();
+});
+let followChannel = null;
+try {
+  followChannel = new BroadcastChannel('gdevent-follows');
+  followChannel.onmessage = (ev) => { if (ev.data && ev.data.type === 'follows') reloadFollows(); };
+} catch (e) { /* 老浏览器不支持时走 storage 事件 */ }
 
 function refresh() {
   renderTypeFilter();
   renderCityFilter();
-  updateOutBtn();
   renderCalendar();
   if (document.getElementById('listView').style.display === 'block') renderListView();
 }
