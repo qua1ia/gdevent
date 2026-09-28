@@ -25,11 +25,14 @@
             padding-bottom: 70px;
         }
 
-        /* 顶部导航 */
+        /* 顶部导航（单行：标题 + 统计 + 更新按钮） */
         .header {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
-            padding: 15px;
+            padding: 9px 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
             position: sticky;
             top: 0;
             z-index: 100;
@@ -37,25 +40,41 @@
         }
 
         .header h1 {
-            font-size: 20px;
+            font-size: 15px;
             font-weight: 600;
-            text-align: center;
-            margin-bottom: 10px;
+            white-space: nowrap;
         }
 
         .header-stats {
             display: flex;
-            justify-content: center;
-            gap: 20px;
-            font-size: 13px;
-            opacity: 0.9;
+            align-items: center;
+            gap: 6px;
+            font-size: 11px;
+            opacity: 0.95;
+            margin-left: auto;
+            white-space: nowrap;
         }
 
         .header-stats span {
             background: rgba(255,255,255,0.2);
-            padding: 4px 12px;
-            border-radius: 20px;
+            padding: 2px 8px;
+            border-radius: 12px;
         }
+
+        .header-stats .status { background: transparent; padding: 0 2px; }
+
+        .header-update {
+            flex: 0 0 auto;
+            background: rgba(255,255,255,0.22);
+            border: none;
+            color: white;
+            font-size: 13px;
+            padding: 4px 9px;
+            border-radius: 16px;
+            cursor: pointer;
+        }
+
+        .header-update:disabled { opacity: .6; }
 
         /* 更新栏 */
         .update-bar {
@@ -91,42 +110,18 @@
             color: #999;
         }
 
-        /* 视图切换 */
-        .view-tabs {
-            display: flex;
-            background: white;
-            border-bottom: 1px solid #e0e0e0;
-            position: sticky;
-            top: 67px;
-            z-index: 99;
-        }
-
-        .view-tab {
-            flex: 1;
-            padding: 12px;
-            text-align: center;
-            font-size: 14px;
-            color: #666;
-            cursor: pointer;
-            border-bottom: 3px solid transparent;
-            transition: all 0.3s;
-        }
-
-        .view-tab.active {
-            color: #667eea;
-            border-bottom-color: #667eea;
-            font-weight: 600;
-        }
-
-        /* 筛选栏 */
+        /* 筛选栏（单行横向滚动，紧凑） */
         .filter-bar {
             display: flex;
-            gap: 8px;
-            padding: 10px 15px;
+            gap: 6px;
+            padding: 7px 12px;
             background: white;
             overflow-x: auto;
             -webkit-overflow-scrolling: touch;
             border-bottom: 1px solid #e0e0e0;
+            position: sticky;
+            top: 47px;
+            z-index: 99;
         }
 
         .filter-bar::-webkit-scrollbar {
@@ -135,9 +130,9 @@
 
         .filter-chip {
             flex-shrink: 0;
-            padding: 6px 16px;
-            border-radius: 20px;
-            font-size: 13px;
+            padding: 4px 12px;
+            border-radius: 16px;
+            font-size: 12px;
             background: #f0f0f0;
             color: #666;
             cursor: pointer;
@@ -513,25 +508,15 @@
     </style>
 </head>
 <body>
-    <!-- 顶部导航 -->
+    <!-- 顶部导航（单行：标题 + 统计 + 更新按钮；视图切换交给底部导航） -->
     <div class="header">
         <h1>🏃 广东赛事日历</h1>
         <div class="header-stats">
             <span id="totalEvents">共 0 场赛事</span>
             <span id="upcomingEvents">近期 0 场</span>
+            <span class="status" id="updateStatus"></span>
         </div>
-    </div>
-
-    <!-- 更新栏 -->
-    <div class="update-bar">
-        <button id="updateBtn" onclick="fetchLatestData()">🔄 更新数据</button>
-        <span class="status" id="updateStatus">点击按钮更新赛事数据</span>
-    </div>
-
-    <!-- 视图切换 -->
-    <div class="view-tabs">
-        <div class="view-tab active" data-view="list">📋 列表</div>
-        <div class="view-tab" data-view="calendar">📅 日历</div>
+        <button class="header-update" id="updateBtn" onclick="fetchLatestData()">🔄</button>
     </div>
 
     <!-- 筛选栏 -->
@@ -621,11 +606,16 @@
             setupEventListeners();
         }
 
+        // 本地时区今天（YYYY-MM-DD）；用字符串比较，兼容 YYYY-MM-00 待定日期
+        function todayStr() {
+            const d = new Date();
+            return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+        }
+
         // 更新统计
         function updateStats() {
-            const today = new Date();
             const total = EVENTS.length;
-            const upcoming = EVENTS.filter(e => new Date(e.date) >= today).length;
+            const upcoming = EVENTS.filter(e => e.date >= todayStr()).length;
             document.getElementById('totalEvents').textContent = `共 ${total} 场赛事`;
             document.getElementById('upcomingEvents').textContent = `近期 ${upcoming} 场`;
         }
@@ -709,12 +699,11 @@
         function renderListView() {
             const container = document.getElementById('listView');
             const today = new Date();
-            today.setHours(0, 0, 0, 0);
 
             let filteredEvents = EVENTS.filter(e => {
                 const typeMatch = currentFilter === 'all' || e.type === currentFilter;
                 const cityMatch = currentCityFilter === 'all' || e.city === currentCityFilter;
-                return typeMatch && cityMatch && new Date(e.date) >= today;
+                return typeMatch && cityMatch && e.date >= todayStr();
             });
 
             // 按日期排序
@@ -984,26 +973,26 @@
             const btn = document.getElementById('updateBtn');
             const status = document.getElementById('updateStatus');
             btn.disabled = true;
-            btn.textContent = '⏳ 更新中...';
-            status.textContent = '正在从 GitHub 获取最新数据...';
+            btn.textContent = '⏳';
+            status.textContent = '更新中...';
 
             const url = DATA_URL + '?t=' + Date.now();
             const s = document.createElement('script');
             s.src = url;
             s.onload = () => {
                 btn.disabled = false;
-                btn.textContent = '✅ 更新完成';
-                status.textContent = '数据已更新 · ' + new Date().toLocaleTimeString('zh-CN');
+                btn.textContent = '✅';
+                status.textContent = '已更新 ' + new Date().toLocaleTimeString('zh-CN');
                 updateStats();
                 if (currentView === 'list') renderListView();
                 else renderCalendar();
-                setTimeout(() => { btn.textContent = '🔄 更新数据'; }, 3000);
+                setTimeout(() => { btn.textContent = '🔄'; }, 3000);
             };
             s.onerror = () => {
                 btn.disabled = false;
-                btn.textContent = '❌ 更新失败';
-                status.textContent = '更新失败，请检查 GitHub 配置或网络';
-                setTimeout(() => { btn.textContent = '🔄 更新数据'; }, 3000);
+                btn.textContent = '❌';
+                status.textContent = '更新失败，请检查网络';
+                setTimeout(() => { btn.textContent = '🔄'; }, 3000);
             };
             document.head.appendChild(s);
         }

@@ -16,32 +16,44 @@
 }
 * { margin:0; padding:0; box-sizing:border-box; }
 body { font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif; background:var(--bg); color:var(--text); min-height:100vh; }
-.header { padding:20px 28px 12px; border-bottom:1px solid var(--border); position:relative; }
-.header h1 { font-size:22px; font-weight:700; margin-bottom:3px; }
-.header p { color:var(--text2); font-size:13px; }
-.nav-row { display:flex; align-items:center; gap:12px; margin-top:12px; flex-wrap:wrap; }
-.nav-btn { background:var(--card); border:1px solid var(--border); color:var(--text); padding:7px 14px; border-radius:8px; cursor:pointer; font-size:13px; transition:background .2s; }
-.nav-btn:hover { background:#334155; }
-.nav-btn:disabled { opacity:.4; cursor:default; }
-.nav-btn.primary { background:#3b82f6; border-color:#3b82f6; color:#fff; }
-.month-label { font-size:18px; font-weight:600; min-width:160px; text-align:center; }
-.today-btn { margin-left:auto; font-size:12px; padding:5px 10px; }
-.filter-section { padding:10px 28px; border-bottom:1px solid var(--border); }
-.filter-label { font-size:11px; color:var(--text2); margin-bottom:6px; font-weight:600; text-transform:uppercase; letter-spacing:.5px; }
-.filter-row { display:flex; flex-wrap:wrap; gap:6px; }
-.filter-item { display:flex; align-items:center; gap:4px; font-size:11px; color:var(--text2); cursor:pointer; padding:3px 8px; border-radius:4px; transition:all .2s; border:1px solid transparent; }
+
+/* ===== 顶部工具条（标题 + 月份导航 + 更新，单行） ===== */
+.topbar { display:flex; align-items:center; gap:10px; padding:9px 18px; border-bottom:1px solid var(--border); flex-wrap:wrap; }
+.topbar h1 { font-size:16px; font-weight:700; white-space:nowrap; }
+.topbar .stats { font-size:12px; color:var(--text2); white-space:nowrap; }
+.topbar .nav { margin-left:auto; display:flex; align-items:center; gap:5px; flex-wrap:wrap; }
+.btn { background:var(--card); border:1px solid var(--border); color:var(--text); padding:4px 9px; border-radius:6px; cursor:pointer; font-size:12px; line-height:1.4; transition:background .15s; }
+.btn:hover { background:#334155; }
+.btn:disabled { opacity:.45; cursor:default; }
+.btn.primary { background:#3b82f6; border-color:#3b82f6; color:#fff; }
+.btn.primary:hover { background:#2563eb; }
+.month-label { font-size:13px; font-weight:600; min-width:92px; text-align:center; }
+.seg { display:flex; border:1px solid var(--border); border-radius:6px; overflow:hidden; }
+.seg button { background:transparent; border:none; color:var(--text2); font-size:12px; padding:4px 10px; cursor:pointer; transition:background .15s; }
+.seg button.active { background:#3b82f6; color:#fff; font-weight:600; }
+.status { font-size:11px; color:var(--text2); }
+
+/* ===== 筛选（类型 / 城市 各一行，横向滚动） ===== */
+.filters { border-bottom:1px solid var(--border); }
+.frow { display:flex; align-items:center; gap:8px; padding:3px 18px; }
+.frow + .frow { border-top:1px solid rgba(51,65,85,.5); }
+.flabel { flex:0 0 28px; font-size:11px; color:var(--text2); font-weight:600; }
+.chips { display:flex; gap:4px; overflow-x:auto; padding:3px 0; scrollbar-width:thin; }
+.chips::-webkit-scrollbar { height:5px; }
+.chips::-webkit-scrollbar-thumb { background:#334155; border-radius:3px; }
+.filter-item { flex:0 0 auto; display:flex; align-items:center; gap:4px; font-size:11px; color:var(--text2); padding:2px 7px; border-radius:9px; border:1px solid transparent; cursor:pointer; white-space:nowrap; transition:all .15s; }
 .filter-item:hover { background:var(--card); }
-.filter-item.disabled { opacity:.35; }
-.filter-dot { width:8px; height:8px; border-radius:50%; flex-shrink:0; }
-.view-toggle { display:flex; border-bottom:1px solid var(--border); }
-.view-toggle button { flex:1; padding:10px; background:none; border:none; color:var(--text2); font-size:14px; cursor:pointer; border-bottom:2px solid transparent; transition:all .2s; }
-.view-toggle button.active { color:var(--today); border-bottom-color:var(--today); font-weight:600; }
-.cal-grid { display:grid; grid-template-columns:repeat(7,1fr); gap:1px; padding:0 28px 20px; }
-.cal-cell { background:var(--card); min-height:90px; padding:4px; border-radius:4px; position:relative; font-size:12px; cursor:pointer; transition:background .15s; }
+.filter-item.disabled { opacity:.35; text-decoration:line-through; }
+.filter-dot { width:7px; height:7px; border-radius:50%; flex-shrink:0; }
+
+/* ===== 日历 ===== */
+.cal-grid { display:grid; grid-template-columns:repeat(7,1fr); gap:1px; padding:8px 18px 14px; }
+.cal-cell { background:var(--card); min-height:72px; padding:3px; border-radius:4px; position:relative; font-size:12px; cursor:pointer; transition:background .15s; }
 .cal-cell:hover { background:#334155; }
 .cal-cell.other-month { opacity:.3; }
 .cal-cell.today { box-shadow:inset 0 0 0 2px var(--today); }
-.day-num { font-weight:700; font-size:12px; margin-bottom:2px; }
+.day-num { font-weight:700; font-size:11px; margin-bottom:1px; color:var(--text2); }
+.cal-cell.today .day-num { color:var(--today); }
 .event-chip { font-size:10px; padding:1px 4px; border-radius:3px; margin-bottom:1px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; cursor:pointer; transition:opacity .15s; }
 .event-chip:hover { opacity:.8; }
 .chip-triathlon { background:rgba(231,76,60,.2); color:#e74c3c; }
@@ -52,23 +64,28 @@ body { font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif
 .chip-cycling { background:rgba(26,188,156,.2); color:#1abc9c; }
 .chip-roadrun { background:rgba(243,156,18,.2); color:#f39c12; }
 .chip-orient { background:rgba(236,72,153,.2); color:#ec4899; }
-.more-chip { font-size:10px; color:var(--text2); padding:1px 4px; cursor:pointer; }
+.more-chip { font-size:10px; color:var(--text2); padding:0 4px; cursor:pointer; }
 .more-chip:hover { color:var(--today); }
-.list-view { padding:16px 28px; display:none; }
-.list-month { font-size:15px; font-weight:700; color:var(--text2); border-bottom:1px solid var(--border); padding:10px 0 6px; margin-top:6px; }
-.list-item { display:flex; gap:12px; padding:10px 12px; background:var(--card); border-radius:8px; margin-bottom:8px; cursor:pointer; transition:background .15s; border-left:3px solid transparent; }
+
+/* ===== 列表 ===== */
+.list-view { padding:10px 18px 20px; display:none; }
+.list-month { font-size:13px; font-weight:700; color:var(--text2); border-bottom:1px solid var(--border); padding:8px 0 5px; margin-top:4px; }
+.list-item { display:flex; gap:10px; padding:8px 10px; background:var(--card); border-radius:7px; margin-bottom:6px; cursor:pointer; transition:background .15s; }
 .list-item:hover { background:#334155; }
-.list-date { text-align:center; min-width:44px; }
-.list-date .month { font-size:11px; color:var(--text2); }
-.list-date .day { font-size:20px; font-weight:700; }
-.list-info { flex:1; }
-.list-info h3 { font-size:14px; font-weight:600; margin-bottom:3px; }
-.list-info p { font-size:12px; color:var(--text2); margin-bottom:2px; }
-.list-badge { display:inline-block; font-size:10px; padding:1px 6px; border-radius:3px; margin-top:2px; }
-.list-city { font-size:11px; color:var(--text2); }
-.list-deadline { font-size:11px; margin-top:4px; }
+.list-date { text-align:center; min-width:40px; }
+.list-date .month { font-size:10px; color:var(--text2); }
+.list-date .day { font-size:17px; font-weight:700; }
+.list-info { flex:1; min-width:0; }
+.list-info h3 { font-size:13px; font-weight:600; margin-bottom:2px; }
+.list-info p { font-size:12px; color:var(--text2); margin-bottom:1px; }
+.list-badge { display:inline-block; font-size:10px; padding:1px 6px; border-radius:3px; margin-top:1px; }
+.list-city { font-size:11px; color:var(--text2); margin-left:6px; }
+.list-deadline { font-size:11px; margin-top:3px; }
 .list-deadline.urgent { color:#ef4444; font-weight:600; }
 .list-deadline.soon { color:#f59e0b; }
+.empty { text-align:center; padding:30px; color:var(--text2); font-size:13px; }
+
+/* ===== 提示框 ===== */
 .tooltip { position:fixed; background:#1e293b; border:1px solid var(--border); border-radius:8px; padding:12px; min-width:260px; max-width:340px; box-shadow:0 8px 30px rgba(0,0,0,.4); z-index:9999; display:none; }
 .tooltip.show { display:block; }
 .tooltip-close { position:absolute; right:8px; top:8px; background:none; border:none; color:var(--text2); font-size:16px; cursor:pointer; }
@@ -77,51 +94,46 @@ body { font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif
 .tooltip-row .label { color:var(--text); font-weight:600; margin-right:6px; }
 .tooltip-link { display:block; margin-top:8px; padding:6px 0; text-align:center; background:#3b82f6; color:#fff; border-radius:6px; text-decoration:none; font-size:13px; font-weight:600; }
 .tooltip-link:hover { background:#2563eb; }
-.empty { text-align:center; padding:40px; color:var(--text2); font-size:13px; }
-.update-bar { display:flex; align-items:center; gap:10px; padding:8px 28px; background:var(--card); border-bottom:1px solid var(--border); font-size:12px; color:var(--text2); flex-wrap:wrap; }
-.update-bar button { background:#3b82f6; color:#fff; border:none; padding:5px 14px; border-radius:6px; cursor:pointer; font-size:12px; font-weight:600; }
-.update-bar button:disabled { background:#64748b; cursor:default; }
-.update-bar .status { margin-left:auto; }
+
 @media(max-width:640px) {
-  .header { padding:14px 16px 10px; }
-  .filter-section { padding:10px 16px; }
-  .cal-grid { padding:0 8px 16px; }
-  .list-view { padding:12px 16px; }
-  .update-bar { padding:8px 16px; }
+  .topbar { padding:8px 12px; }
+  .topbar h1 { font-size:14px; }
+  .topbar .stats { display:none; }
+  .frow { padding:3px 12px; }
+  .cal-grid { padding:6px 6px 12px; }
+  .cal-cell { min-height:60px; }
+  .list-view { padding:10px 12px; }
 }
 </style>
 </head>
 <body>
 
-<div class="header">
-  <h1>🏃 广东省户外赛事日历 2026</h1>
-  <p id="statsLine">加载中...</p>
-  <div class="nav-row">
-    <button class="nav-btn" id="prevBtn" onclick="changeMonth(-1)">‹ 上月</button>
+<div class="topbar">
+  <h1>🏃 广东省户外赛事日历</h1>
+  <span class="stats" id="statsLine">加载中...</span>
+  <div class="nav">
+    <button class="btn" id="prevBtn" onclick="changeMonth(-1)">‹</button>
     <div class="month-label" id="monthLabel">—</div>
-    <button class="nav-btn" id="nextBtn" onclick="changeMonth(1)">下月 ›</button>
-    <button class="nav-btn today-btn" onclick="goToday()">📅 今天</button>
+    <button class="btn" id="nextBtn" onclick="changeMonth(1)">›</button>
+    <button class="btn" onclick="goToday()">今天</button>
+    <div class="seg">
+      <button class="active" id="calViewBtn" onclick="switchView('cal')">日历</button>
+      <button id="listViewBtn" onclick="switchView('list')">列表</button>
+    </div>
+    <button class="btn primary" id="updateBtn" onclick="fetchLatestData()">🔄 更新</button>
+    <span class="status" id="updateStatus"></span>
   </div>
 </div>
 
-<div class="update-bar">
-  <span>📡 数据文件：<code>data/events-data.js</code></span>
-  <button id="updateBtn" onclick="fetchLatestData()">🔄 更新数据</button>
-  <span class="status" id="updateStatus"></span>
-</div>
-
-<div class="filter-section">
-  <div class="filter-label">赛事类型</div>
-  <div class="filter-row" id="typeFilter"></div>
-</div>
-<div class="filter-section">
-  <div class="filter-label">举办城市</div>
-  <div class="filter-row" id="cityFilter"></div>
-</div>
-
-<div class="view-toggle">
-  <button class="active" id="calViewBtn" onclick="switchView('cal')">📅 日历</button>
-  <button id="listViewBtn" onclick="switchView('list')">📋 列表</button>
+<div class="filters">
+  <div class="frow">
+    <span class="flabel">类型</span>
+    <div class="chips" id="typeFilter"></div>
+  </div>
+  <div class="frow">
+    <span class="flabel">城市</span>
+    <div class="chips" id="cityFilter"></div>
+  </div>
 </div>
 
 <div class="cal-grid" id="calGrid"></div>
@@ -141,6 +153,22 @@ const today = new Date();
 currentYear = today.getFullYear();
 currentMonth = today.getMonth();
 
+const OUT_CITIES = window.OUT_PROVINCE_CITIES || [];
+const OUT_SET = new Set(OUT_CITIES);
+// 城市筛选项：广东各市 + 一个「省外」合并项
+const CITY_KEYS = (window.CITY_LIST || []).filter(c => !OUT_SET.has(c)).concat(['省外']);
+const OUT_KEY = '省外';
+
+/* 本地时区的今天（YYYY-MM-DD），避免 toISOString 的时区偏移 */
+function todayStr() {
+  const d = new Date();
+  return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+}
+function isOutProvince(city) { return OUT_SET.has(city); }
+function cityHidden(city) {
+  return hiddenCities.has(city) || (hiddenCities.has(OUT_KEY) && isOutProvince(city));
+}
+
 /* ====== 初始化 ====== */
 function init() {
   renderTypeFilter();
@@ -151,9 +179,10 @@ function init() {
 
 function updateStats() {
   const total = EVENTS.length;
-  const upcoming = EVENTS.filter(e => e.date >= today.toISOString().slice(0,10)).length;
+  const upcoming = EVENTS.filter(e => e.date >= todayStr()).length;
+  const out = EVENTS.filter(e => isOutProvince(e.city)).length;
   document.getElementById('statsLine').textContent =
-    `共 ${total} 场赛事 · 当前显示 ${upcoming} 场即将进行`;
+    `共 ${total} 场 · 广东 ${total - out} · 省外 ${out} · 即将进行 ${upcoming}`;
 }
 
 /* ====== 筛选 ====== */
@@ -161,13 +190,13 @@ function renderTypeFilter() {
   const el = document.getElementById('typeFilter');
   el.innerHTML = '';
   for (const [type, info] of Object.entries(TYPE_MAP)) {
+    const count = EVENTS.filter(e => e.type === type).length;
     const item = document.createElement('div');
-    item.className = 'filter-item' + (hiddenTypes.has(type)?' disabled':'');
-    item.innerHTML = `<span class="filter-dot" style="background:${info.color}"></span>${info.label}`;
+    item.className = 'filter-item' + (hiddenTypes.has(type) ? ' disabled' : '');
+    item.innerHTML = `<span class="filter-dot" style="background:${info.color}"></span>${info.label}<span style="opacity:.5">${count}</span>`;
     item.onclick = () => {
-      hiddenTypes.has(type)? hiddenTypes.delete(type) : hiddenTypes.add(type);
-      renderTypeFilter(); renderCalendar();
-      if(document.getElementById('listView').style.display !== 'none') renderListView();
+      hiddenTypes.has(type) ? hiddenTypes.delete(type) : hiddenTypes.add(type);
+      refresh();
     };
     el.appendChild(item);
   }
@@ -177,90 +206,98 @@ function renderCityFilter() {
   const el = document.getElementById('cityFilter');
   el.innerHTML = '';
   const all = document.createElement('div');
-  all.className = 'filter-item city' + (hiddenCities.size === 0 ? '' : ' disabled');
+  all.className = 'filter-item' + (hiddenCities.size === 0 ? '' : ' disabled');
   all.textContent = '全部';
   all.onclick = () => {
-    if(hiddenCities.size > 0){ hiddenCities.clear(); }
-    else { CITY_LIST.forEach(c => hiddenCities.add(c)); }
-    renderCityFilter(); renderCalendar();
-    if(document.getElementById('listView').style.display !== 'none') renderListView();
+    if (hiddenCities.size > 0) hiddenCities.clear();
+    else CITY_KEYS.forEach(c => hiddenCities.add(c));
+    refresh();
   };
   el.appendChild(all);
-  CITY_LIST.forEach(city => {
+  CITY_KEYS.forEach(city => {
+    const count = EVENTS.filter(e => city === OUT_KEY ? isOutProvince(e.city) : e.city === city).length;
+    if (!count) return;                       // 没有赛事的城市不出筛选项
     const item = document.createElement('div');
-    item.className = 'filter-item city' + (hiddenCities.has(city)?' disabled':'');
-    item.textContent = city;
+    item.className = 'filter-item' + (hiddenCities.has(city) ? ' disabled' : '');
+    item.textContent = city + count;
     item.onclick = () => {
-      hiddenCities.has(city)? hiddenCities.delete(city) : hiddenCities.add(city);
-      renderCityFilter(); renderCalendar();
-      if(document.getElementById('listView').style.display !== 'none') renderListView();
+      hiddenCities.has(city) ? hiddenCities.delete(city) : hiddenCities.add(city);
+      refresh();
     };
     el.appendChild(item);
   });
 }
 
+function refresh() {
+  renderTypeFilter();
+  renderCityFilter();
+  renderCalendar();
+  if (document.getElementById('listView').style.display === 'block') renderListView();
+}
+
 function filteredEvents() {
-  return EVENTS.filter(e => !hiddenTypes.has(e.type) && !hiddenCities.has(e.city));
+  return EVENTS.filter(e => !hiddenTypes.has(e.type) && !cityHidden(e.city));
 }
 
 /* ====== 视图切换 ====== */
 function changeMonth(d) {
   currentMonth += d;
-  if(currentMonth > 11) { currentMonth = 0; currentYear++; }
-  if(currentMonth < 0) { currentMonth = 11; currentYear--; }
+  if (currentMonth > 11) { currentMonth = 0; currentYear++; }
+  if (currentMonth < 0) { currentMonth = 11; currentYear--; }
   renderCalendar();
 }
 function goToday() {
   currentYear = today.getFullYear();
   currentMonth = today.getMonth();
   renderCalendar();
-  if(document.getElementById('listView').style.display !== 'none') renderListView();
+  if (document.getElementById('listView').style.display === 'block') renderListView();
 }
 function switchView(v) {
   document.getElementById('calViewBtn').classList.toggle('active', v === 'cal');
   document.getElementById('listViewBtn').classList.toggle('active', v === 'list');
   document.getElementById('calGrid').style.display = v === 'cal' ? '' : 'none';
-  document.getElementById('listView').style.display = v === 'list' ? '' : 'none';
-  if(v === 'list') renderListView();
+  document.getElementById('listView').style.display = v === 'list' ? 'block' : 'none';
+  if (v === 'list') renderListView();
 }
 
 /* ====== 日历渲染 ====== */
 function renderCalendar() {
   const months = ['1月','2月','3月','4月','5月','6月','7月','8月','9月','10月','11月','12月'];
-  document.getElementById('monthLabel').textContent = currentYear + '年 ' + months[currentMonth];
+  document.getElementById('monthLabel').textContent = currentYear + '年' + months[currentMonth];
   const grid = document.getElementById('calGrid');
-  while(grid.children.length > 7) grid.removeChild(grid.lastChild);
+  grid.innerHTML = '';
+  const t = todayStr();
 
   const firstDay = new Date(currentYear, currentMonth, 1);
-  let startDay = firstDay.getDay(); if(startDay === 0) startDay = 7; startDay--;
-  const daysInMonth = new Date(currentYear, currentMonth+1, 0).getDate();
+  let startDay = firstDay.getDay(); if (startDay === 0) startDay = 7; startDay--;
+  const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
   const daysInPrev = new Date(currentYear, currentMonth, 0).getDate();
   const visible = filteredEvents();
 
-  for(let i = 0; i < 42; i++) {
+  for (let i = 0; i < 42; i++) {
     const cell = document.createElement('div');
     cell.className = 'cal-cell';
     let dayNum, dateStr, isOther = false;
 
-    if(i < startDay) {
+    if (i < startDay) {
       dayNum = daysInPrev - startDay + i + 1;
       const pm = currentMonth === 0 ? 11 : currentMonth - 1;
       const py = currentMonth === 0 ? currentYear - 1 : currentYear;
-      dateStr = py + '-' + String(pm+1).padStart(2,'0') + '-' + String(dayNum).padStart(2,'0');
+      dateStr = py + '-' + String(pm + 1).padStart(2, '0') + '-' + String(dayNum).padStart(2, '0');
       isOther = true;
-    } else if(i - startDay >= daysInMonth) {
+    } else if (i - startDay >= daysInMonth) {
       dayNum = i - startDay - daysInMonth + 1;
       const nm = currentMonth === 11 ? 0 : currentMonth + 1;
       const ny = currentMonth === 11 ? currentYear + 1 : currentYear;
-      dateStr = ny + '-' + String(nm+1).padStart(2,'0') + '-' + String(dayNum).padStart(2,'0');
+      dateStr = ny + '-' + String(nm + 1).padStart(2, '0') + '-' + String(dayNum).padStart(2, '0');
       isOther = true;
     } else {
       dayNum = i - startDay + 1;
-      dateStr = currentYear + '-' + String(currentMonth+1).padStart(2,'0') + '-' + String(dayNum).padStart(2,'0');
+      dateStr = currentYear + '-' + String(currentMonth + 1).padStart(2, '0') + '-' + String(dayNum).padStart(2, '0');
     }
 
-    if(isOther) cell.classList.add('other-month');
-    if(dateStr === today.toISOString().slice(0,10)) cell.classList.add('today');
+    if (isOther) cell.classList.add('other-month');
+    if (dateStr === t) cell.classList.add('today');
 
     const dayEl = document.createElement('div');
     dayEl.className = 'day-num';
@@ -277,7 +314,7 @@ function renderCalendar() {
       chip.onclick = (e) => { e.stopPropagation(); showTooltip(ev, e); };
       cell.appendChild(chip);
     });
-    if(dayEvents.length > maxShow) {
+    if (dayEvents.length > maxShow) {
       const more = document.createElement('div');
       more.className = 'more-chip';
       more.textContent = '+' + (dayEvents.length - maxShow) + ' 更多';
@@ -294,28 +331,28 @@ function showTooltip(ev, e) {
   const tip = document.getElementById('tooltip');
   const info = TYPE_MAP[ev.type] || {};
   let deadlineClass = ''; let deadlineText = ev.deadline || '';
-  if(ev.deadline && ev.deadline !== '待公布' && ev.deadline !== '待确认' && ev.deadline !== '先报先得') {
+  if (ev.deadline && ev.deadline !== '待公布' && ev.deadline !== '待确认' && ev.deadline !== '先报先得') {
     const dl = new Date(ev.deadline.replace(' ', 'T'));
     const diff = (dl - today) / 86400000;
-    if(diff < 0) { deadlineClass = 'expired'; deadlineText += ' ⛔已截止'; }
-    else if(diff < 3) { deadlineClass = 'urgent'; deadlineText += ' 🔴即将截止!'; }
-    else if(diff < 7) { deadlineClass = 'soon'; deadlineText += ' 🟡'; }
+    if (diff < 0) { deadlineClass = 'expired'; deadlineText += ' ⛔已截止'; }
+    else if (diff < 3) { deadlineClass = 'urgent'; deadlineText += ' 🔴即将截止!'; }
+    else if (diff < 7) { deadlineClass = 'soon'; deadlineText += ' 🟡'; }
   }
   let html = `<div class="tooltip-title"><span class="tooltip-type" style="background:${info.color || '#666'}20;color:${info.color || '#666'}">${info.label || ev.type}</span> ${ev.name}</div>`;
-  if(ev.loc) html += `<div class="tooltip-row"><span class="label">📍 地点</span>${ev.loc}</div>`;
-  html += `<div class="tooltip-row"><span class="label">🏙 城市</span>${ev.city}</div>`;
+  if (ev.loc) html += `<div class="tooltip-row"><span class="label">📍 地点</span>${ev.loc}</div>`;
+  html += `<div class="tooltip-row"><span class="label">🏙 城市</span>${ev.city}${isOutProvince(ev.city) ? '（省外）' : ''}</div>`;
   html += `<div class="tooltip-row"><span class="label">📅 时间</span>${ev.date}</div>`;
-  if(ev.deadline) html += `<div class="tooltip-row tooltip-deadline ${deadlineClass}"><span class="label">⏰ 截止</span>${deadlineText}</div>`;
-  if(ev.source) html += `<div class="tooltip-row"><span class="label">📡 来源</span>${ev.source}</div>`;
-  if(ev.note) html += `<div class="tooltip-row"><span class="label">📝 备注</span>${ev.note}</div>`;
-  if(ev.link) html += `<a class="tooltip-link" href="${ev.link}" target="_blank">🔗 前往报名 →</a>`;
+  if (ev.deadline) html += `<div class="tooltip-row tooltip-deadline ${deadlineClass}"><span class="label">⏰ 截止</span>${deadlineText}</div>`;
+  if (ev.source) html += `<div class="tooltip-row"><span class="label">📡 来源</span>${ev.source}</div>`;
+  if (ev.note) html += `<div class="tooltip-row"><span class="label">📝 备注</span>${ev.note}</div>`;
+  if (ev.link) html += `<a class="tooltip-link" href="${ev.link}" target="_blank">🔗 前往报名 →</a>`;
   document.getElementById('tooltipContent').innerHTML = html;
   tip.classList.add('show');
   const rect = (e && e.target) ? e.target.getBoundingClientRect() : { right:200, top:200 };
   let left = (rect.right || 200) + 8, top = (rect.top || 200);
-  if(left + 320 > window.innerWidth) left = (rect.left || 200) - 320;
-  if(top + 300 > window.innerHeight) top = window.innerHeight - 310;
-  if(top < 10) top = 10;
+  if (left + 320 > window.innerWidth) left = (rect.left || 200) - 320;
+  if (top + 300 > window.innerHeight) top = window.innerHeight - 310;
+  if (top < 10) top = 10;
   tip.style.left = left + 'px';
   tip.style.top = top + 'px';
 }
@@ -339,40 +376,41 @@ function showDayList(dateStr, dayEvents, e) {
 
 function hideTooltip() { document.getElementById('tooltip').classList.remove('show'); }
 document.addEventListener('click', (e) => {
-  if(!e.target.closest('.tooltip') && !e.target.closest('.event-chip') && !e.target.closest('.more-chip') && !e.target.closest('.list-item')) hideTooltip();
+  if (!e.target.closest('.tooltip') && !e.target.closest('.event-chip') && !e.target.closest('.more-chip') && !e.target.closest('.list-item')) hideTooltip();
 });
 
 /* ====== 列表视图 ====== */
 function renderListView() {
   const el = document.getElementById('listView');
-  const visible = filteredEvents().filter(e => e.date >= today.toISOString().slice(0,10));
-  visible.sort((a,b) => a.date.localeCompare(b.date));
-  if(visible.length === 0) {
+  const visible = filteredEvents().filter(e => e.date >= todayStr());
+  visible.sort((a, b) => a.date.localeCompare(b.date));
+  if (visible.length === 0) {
     el.innerHTML = '<div class="empty">暂无符合条件的赛事</div>';
     return;
   }
   let html = '', lastMonth = '';
   visible.forEach(ev => {
-    const m = ev.date.slice(0,7);
-    if(m !== lastMonth) {
-      const [y,mo] = m.split('-');
+    const m = ev.date.slice(0, 7);
+    if (m !== lastMonth) {
+      const [y, mo] = m.split('-');
       html += `<div class="list-month">${y}年${parseInt(mo)}月</div>`;
       lastMonth = m;
     }
-    const [dy,dm,dd] = ev.date.split('-');
+    const [dy, dm, dd] = ev.date.split('-');
     let dlCls = '';
-    if(ev.deadline && ev.deadline !== '待公布' && ev.deadline !== '待确认' && ev.deadline !== '先报先得') {
-      const dl = new Date(ev.deadline.replace(' ','T'));
+    if (ev.deadline && ev.deadline !== '待公布' && ev.deadline !== '待确认' && ev.deadline !== '先报先得') {
+      const dl = new Date(ev.deadline.replace(' ', 'T'));
       const diff = (dl - today) / 86400000;
-      if(diff < 3) dlCls = 'urgent';
-      else if(diff < 7) dlCls = 'soon';
+      if (diff < 0) dlCls = '';
+      else if (diff < 3) dlCls = 'urgent';
+      else if (diff < 7) dlCls = 'soon';
     }
     const info = TYPE_MAP[ev.type] || {};
     html += `<div class="list-item" onclick="showTooltip(EVENTS.find(x=>x.id===${ev.id}),event)">
       <div class="list-date"><div class="month">${parseInt(dm)}月</div><div class="day">${parseInt(dd)}</div></div>
       <div class="list-info"><h3>${ev.name}</h3><p>📍 ${ev.loc||ev.city}</p>
         <span class="list-badge" style="background:${(info.color||'#666')}20;color:${info.color||'#666'}">${info.label||ev.type}</span>
-        <span class="list-city">${ev.city}</span>
+        <span class="list-city">${ev.city}${isOutProvince(ev.city) ? '（省外）' : ''}</span>
         ${ev.deadline ? `<div class="list-deadline ${dlCls}">⏰ 报名截止：${ev.deadline}</div>` : ''}
       </div></div>`;
   });
@@ -380,33 +418,30 @@ function renderListView() {
 }
 
 /* ====== 更新数据 ====== */
-// GitHub raw URL — 请替换为你的实际仓库路径
 const DATA_URL = 'data/events-data.js';
 
 function fetchLatestData() {
   const btn = document.getElementById('updateBtn');
   const status = document.getElementById('updateStatus');
   btn.disabled = true;
-  btn.textContent = '⏳ 更新中...';
-  status.textContent = '正在从 GitHub 获取最新数据...';
-  // 加时间戳防止缓存
+  btn.textContent = '⏳ 更新中';
+  status.textContent = '正在获取最新数据...';
   const url = DATA_URL + '?t=' + Date.now();
   const s = document.createElement('script');
   s.src = url;
   s.onload = () => {
     btn.disabled = false;
-    btn.textContent = '✅ 更新完成';
-    status.textContent = '数据已更新 · ' + new Date().toLocaleTimeString('zh-CN');
-    renderCalendar();
-    if(document.getElementById('listView').style.display !== 'none') renderListView();
+    btn.textContent = '✅ 已更新';
+    status.textContent = new Date().toLocaleTimeString('zh-CN');
+    refresh();
     updateStats();
-    setTimeout(() => { btn.textContent = '🔄 更新数据'; }, 3000);
+    setTimeout(() => { btn.textContent = '🔄 更新'; }, 2500);
   };
   s.onerror = () => {
     btn.disabled = false;
-    btn.textContent = '❌ 更新失败';
-    status.textContent = '更新失败，请检查网络或 GitHub 配置';
-    setTimeout(() => { btn.textContent = '🔄 更新数据'; }, 3000);
+    btn.textContent = '❌ 失败';
+    status.textContent = '更新失败，请检查网络';
+    setTimeout(() => { btn.textContent = '🔄 更新'; }, 2500);
   };
   document.head.appendChild(s);
 }
