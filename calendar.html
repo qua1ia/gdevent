@@ -75,6 +75,22 @@ body { font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif
 .more-chip { font-size:10px; color:var(--text2); padding:0 4px; cursor:pointer; }
 .more-chip:hover { color:var(--today); }
 
+/* ===== 关注 / 不关注 ===== */
+.event-chip.f-follow { box-shadow:inset 0 0 0 1.5px #fbbf24; font-weight:700; }
+.event-chip.f-ignore { font-size:9px; padding:0 3px; opacity:.4; max-width:55%; }
+.list-item.f-follow { border-left:3px solid #fbbf24; }
+.list-item.f-ignore { padding:4px 10px; opacity:.55; }
+.list-item.f-ignore h3 { font-size:12px; font-weight:400; }
+.list-item.f-ignore .list-info p,
+.list-item.f-ignore .list-badge,
+.list-item.f-ignore .list-deadline { display:none; }
+.ftag { font-size:10px; color:var(--text2); }
+.fbar { display:flex; gap:6px; margin-top:9px; }
+.fbar button { flex:1; background:var(--card); border:1px solid var(--border); color:var(--text); font-size:12px; padding:5px 0; border-radius:6px; cursor:pointer; transition:all .15s; }
+.fbar button:hover { background:#334155; }
+.fbar button.on { background:#fbbf24; border-color:#fbbf24; color:#1e293b; font-weight:700; }
+.fbar button.btn-ignore.on { background:#64748b; border-color:#64748b; color:#fff; }
+
 /* ===== 列表 ===== */
 .list-view { padding:10px 18px 20px; display:none; }
 .list-month { font-size:13px; font-weight:700; color:var(--text2); border-bottom:1px solid var(--border); padding:8px 0 5px; margin-top:4px; }
@@ -169,6 +185,33 @@ currentMonth = today.getMonth();
 
 const OUT_CITIES = window.OUT_PROVINCE_CITIES || [];
 const OUT_SET = new Set(OUT_CITIES);
+
+/* ===== 关注 / 不关注（localStorage 持久化，与移动版共享） ===== */
+let FOLLOWS = {};
+try { FOLLOWS = JSON.parse(localStorage.getItem('gdevent.follows') || '{}') || {}; } catch (e) { FOLLOWS = {}; }
+function saveFollows() { try { localStorage.setItem('gdevent.follows', JSON.stringify(FOLLOWS)); } catch (e) {} }
+function followState(id) { return FOLLOWS[id] || ''; }
+function followRank(id) { const s = followState(id); return s === 'follow' ? 0 : s === 'ignore' ? 2 : 1; }
+function setFollow(id, st) {
+  if (st) FOLLOWS[id] = st; else delete FOLLOWS[id];
+  saveFollows();
+  refresh();
+  updateStats();
+  // 同步气泡内按钮态
+  const tip = document.getElementById('tooltip');
+  if (tip.classList.contains('show')) {
+    const b1 = tip.querySelector('[data-act="follow"]'), b2 = tip.querySelector('[data-act="ignore"]');
+    if (b1) b1.classList.toggle('on', st === 'follow');
+    if (b2) b2.classList.toggle('on', st === 'ignore');
+  }
+}
+function followBarHtml(ev) {
+  const st = followState(ev.id);
+  return `<div class="fbar">` +
+    `<button data-act="follow" class="${st === 'follow' ? 'on' : ''}" onclick="event.stopPropagation();setFollow(${ev.id},'follow')">⭐ 关注</button>` +
+    `<button data-act="ignore" class="btn-ignore ${st === 'ignore' ? 'on' : ''}" onclick="event.stopPropagation();setFollow(${ev.id},'ignore')">🚫 不关注</button>` +
+    `</div>`;
+}
 // 城市筛选项：广东各市 + 一个「省外」合并项
 const CITY_KEYS = (window.CITY_LIST || []).filter(c => !OUT_SET.has(c)).concat(['省外']);
 const OUT_KEY = '省外';
@@ -196,8 +239,11 @@ function updateStats() {
   const total = EVENTS.length;
   const upcoming = EVENTS.filter(e => e.date >= todayStr()).length;
   const out = EVENTS.filter(e => isOutProvince(e.city)).length;
+  const f = EVENTS.filter(e => followState(e.id) === 'follow').length;
+  const g = EVENTS.filter(e => followState(e.id) === 'ignore').length;
   document.getElementById('statsLine').textContent =
-    `共 ${total} 场 · 广东 ${total - out} · 省外 ${out} · 即将进行 ${upcoming}`;
+    `共 ${total} 场 · 广东 ${total - out} · 省外 ${out} · 即将进行 ${upcoming}` +
+    (f || g ? ` · ⭐关注 ${f} · 🚫忽略 ${g}` : '');
 }
 
 /* ====== 筛选 ====== */
@@ -337,13 +383,16 @@ function renderCalendar() {
     dayEl.textContent = dayNum;
     cell.appendChild(dayEl);
 
-    const dayEvents = visible.filter(e => e.date === dateStr);
+    const dayEvents = visible.filter(e => e.date === dateStr)
+      .sort((a, b) => followRank(a.id) - followRank(b.id));   // 关注在前，忽略在后
     const maxShow = isWkend ? 5 : 2;   // 周末列更宽，多显示几场
     dayEvents.slice(0, maxShow).forEach(ev => {
       const chip = document.createElement('div');
       const cls = (TYPE_MAP[ev.type] || {}).cls || '';
-      chip.className = 'event-chip chip-' + cls;
-      chip.textContent = (ev.city ? ev.city + '·' : '') + ev.name;
+      const st = followState(ev.id);
+      chip.className = 'event-chip chip-' + cls +
+        (st === 'follow' ? ' f-follow' : st === 'ignore' ? ' f-ignore' : '');
+      chip.textContent = (st === 'follow' ? '⭐' : '') + (ev.city ? ev.city + '·' : '') + ev.name;
       chip.onclick = (e) => { e.stopPropagation(); showTooltip(ev, e); };
       cell.appendChild(chip);
     });
@@ -379,13 +428,17 @@ function showTooltip(ev, e) {
   if (ev.source) html += `<div class="tooltip-row"><span class="label">📡 来源</span>${ev.source}</div>`;
   if (ev.note) html += `<div class="tooltip-row"><span class="label">📝 备注</span>${ev.note}</div>`;
   if (ev.link) html += `<a class="tooltip-link" href="${ev.link}" target="_blank">🔗 前往报名 →</a>`;
+  html += followBarHtml(ev);
+  const st0 = followState(ev.id);
+  if (st0) html += `<div class="ftag" style="margin-top:5px;text-align:center">${st0 === 'follow' ? '⭐ 已关注：始终完整展示' : '🚫 已忽略：日历/列表中缩小显示'}</div>`;
   document.getElementById('tooltipContent').innerHTML = html;
   tip.classList.add('show');
   const rect = (e && e.target) ? e.target.getBoundingClientRect() : { right:200, top:200 };
   let left = (rect.right || 200) + 8, top = (rect.top || 200);
-  if (left + 320 > window.innerWidth) left = (rect.left || 200) - 320;
-  if (top + 300 > window.innerHeight) top = window.innerHeight - 310;
-  if (top < 10) top = 10;
+  if (left + 330 > window.innerWidth) left = (rect.left || 200) - 330;
+  if (top + 320 > window.innerHeight) top = window.innerHeight - 320;
+  left = Math.max(8, Math.min(left, window.innerWidth - 330));
+  top = Math.max(8, top);
   tip.style.left = left + 'px';
   tip.style.top = top + 'px';
 }
@@ -397,14 +450,16 @@ function showDayList(dateStr, dayEvents, e) {
     const info = TYPE_MAP[ev.type] || {};
     html += `<div style="padding:5px 0;border-bottom:1px solid var(--border);cursor:pointer" onclick="hideTooltip();setTimeout(()=>showTooltip(EVENTS.find(x=>x.id===${ev.id}),event)">`;
     html += `<span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:${(info.color||'#666')};margin-right:5px"></span>`;
-    html += `<span style="font-size:12px">${ev.city}·${ev.name}</span>`;
+    html += `<span style="font-size:12px">${followState(ev.id) === 'follow' ? '⭐' : ''}${ev.city}·${ev.name}${followState(ev.id) === 'ignore' ? '（已忽略）' : ''}</span>`;
     html += `<div style="font-size:10px;color:var(--text2);margin-left:12px">${ev.loc||''}</div></div>`;
   });
   document.getElementById('tooltipContent').innerHTML = html;
   tip.classList.add('show');
   const rect = (e && e.target) ? e.target.getBoundingClientRect() : { right:200, top:200 };
-  tip.style.left = Math.min((rect.right||200)+8, window.innerWidth-330) + 'px';
-  tip.style.top = Math.min((rect.top||200), window.innerHeight-300) + 'px';
+  const l = Math.max(8, Math.min((rect.right||200)+8, window.innerWidth-330));
+  const t = Math.max(8, Math.min((rect.top||200), window.innerHeight-300));
+  tip.style.left = l + 'px';
+  tip.style.top = t + 'px';
 }
 
 function hideTooltip() { document.getElementById('tooltip').classList.remove('show'); }
@@ -416,7 +471,7 @@ document.addEventListener('click', (e) => {
 function renderListView() {
   const el = document.getElementById('listView');
   const visible = filteredEvents().filter(e => e.date >= todayStr());
-  visible.sort((a, b) => a.date.localeCompare(b.date));
+  visible.sort((a, b) => a.date.localeCompare(b.date) || followRank(a.id) - followRank(b.id));
   if (visible.length === 0) {
     el.innerHTML = '<div class="empty">暂无符合条件的赛事</div>';
     return;
@@ -429,6 +484,7 @@ function renderListView() {
       html += `<div class="list-month">${y}年${parseInt(mo)}月</div>`;
       lastMonth = m;
     }
+    const st = followState(ev.id);
     const [dy, dm, dd] = ev.date.split('-');
     let dlCls = '';
     if (ev.deadline && ev.deadline !== '待公布' && ev.deadline !== '待确认' && ev.deadline !== '先报先得') {
@@ -439,9 +495,11 @@ function renderListView() {
       else if (diff < 7) dlCls = 'soon';
     }
     const info = TYPE_MAP[ev.type] || {};
-    html += `<div class="list-item" onclick="showTooltip(EVENTS.find(x=>x.id===${ev.id}),event)">
+    const name = (st === 'follow' ? '⭐ ' : '') + ev.name +
+      (st === 'ignore' ? ' <span class="ftag">🚫已忽略·点开可恢复</span>' : '');
+    html += `<div class="list-item${st === 'follow' ? ' f-follow' : st === 'ignore' ? ' f-ignore' : ''}" onclick="showTooltip(EVENTS.find(x=>x.id===${ev.id}),event)">
       <div class="list-date"><div class="month">${parseInt(dm)}月</div><div class="day">${parseInt(dd)}</div></div>
-      <div class="list-info"><h3>${ev.name}</h3><p>📍 ${ev.loc||ev.city}</p>
+      <div class="list-info"><h3>${name}</h3><p>📍 ${ev.loc||ev.city}</p>
         <span class="list-badge" style="background:${(info.color||'#666')}20;color:${info.color||'#666'}">${info.label||ev.type}</span>
         <span class="list-city">${ev.city}${isOutProvince(ev.city) ? '（省外）' : ''}</span>
         ${ev.deadline ? `<div class="list-deadline ${dlCls}">⏰ 报名截止：${ev.deadline}</div>` : ''}

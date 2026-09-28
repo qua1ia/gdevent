@@ -337,6 +337,68 @@
             transform: scale(0.98);
         }
 
+        /* 关注 / 不关注 */
+        .event-card.f-follow {
+            border: 1.5px solid #fbbf24;
+            box-shadow: 0 2px 10px rgba(251, 191, 36, .18);
+        }
+
+        .event-card.f-ignore {
+            padding: 8px 12px;
+            opacity: .6;
+            box-shadow: none;
+            background: #fafafa;
+        }
+
+        .event-card.f-ignore .event-details,
+        .event-card.f-ignore .event-card-footer,
+        .event-card.f-ignore .event-note {
+            display: none;
+        }
+
+        .event-card.f-ignore .event-name {
+            font-size: 13px;
+            font-weight: 400;
+            color: #777;
+        }
+
+        .follow-bar {
+            display: flex;
+            gap: 8px;
+            margin-top: 10px;
+        }
+
+        .follow-bar button {
+            flex: 1;
+            background: #f5f6fa;
+            border: 1px solid #e3e6ef;
+            color: #444;
+            font-size: 12px;
+            padding: 7px 0;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        .follow-bar button.on {
+            background: #fbbf24;
+            border-color: #fbbf24;
+            color: #1e293b;
+            font-weight: 700;
+        }
+
+        .follow-bar button.btn-ignore.on {
+            background: #94a3b8;
+            border-color: #94a3b8;
+            color: #fff;
+        }
+
+        .follow-tip {
+            margin-top: 6px;
+            font-size: 11px;
+            color: #999;
+            text-align: center;
+        }
+
         .event-card-header {
             display: flex;
             justify-content: space-between;
@@ -645,6 +707,36 @@
         const OUT_SET = new Set(window.OUT_PROVINCE_CITIES || []);
         let showOut = true;
 
+        // 关注 / 不关注（localStorage 持久化，与桌面版共享）
+        let FOLLOWS = {};
+        try { FOLLOWS = JSON.parse(localStorage.getItem('gdevent.follows') || '{}') || {}; } catch (e) { FOLLOWS = {}; }
+        function saveFollows() { try { localStorage.setItem('gdevent.follows', JSON.stringify(FOLLOWS)); } catch (e) {} }
+        function followState(id) { return FOLLOWS[id] || ''; }
+        function followRank(id) { const s = followState(id); return s === 'follow' ? 0 : s === 'ignore' ? 2 : 1; }
+        function setFollow(id, st) {
+            if (st) FOLLOWS[id] = st; else delete FOLLOWS[id];
+            saveFollows();
+            updateStats();
+            if (currentView === 'list') renderListView(); else renderCalendar();
+            // 同步详情弹窗里的按钮态
+            const body = document.getElementById('eventDetailBody');
+            if (document.getElementById('eventModal').classList.contains('active')) {
+                const b1 = body.querySelector('[data-act="follow"]'), b2 = body.querySelector('[data-act="ignore"]');
+                if (b1) b1.classList.toggle('on', st === 'follow');
+                if (b2) b2.classList.toggle('on', st === 'ignore');
+                const tip = body.querySelector('.follow-tip');
+                if (tip) tip.textContent = st === 'follow' ? '⭐ 已关注：始终完整展示' : st === 'ignore' ? '🚫 已忽略：列表中缩小显示' : '';
+            }
+        }
+        function followBarHtml(ev) {
+            const st = followState(ev.id);
+            return '<div class="follow-bar">' +
+                '<button data-act="follow" class="' + (st === 'follow' ? 'on' : '') + '" onclick="event.stopPropagation();setFollow(' + ev.id + ',\'follow\')">⭐ 关注</button>' +
+                '<button data-act="ignore" class="btn-ignore ' + (st === 'ignore' ? 'on' : '') + '" onclick="event.stopPropagation();setFollow(' + ev.id + ',\'ignore\')">🚫 不关注</button>' +
+                '</div>' +
+                (st ? '<div class="follow-tip">' + (st === 'follow' ? '⭐ 已关注：始终完整展示' : '🚫 已忽略：列表中缩小显示') + '</div>' : '');
+        }
+
         // GitHub raw URL — 请替换为你的实际仓库路径
         const DATA_URL = 'data/events-data.js';
 
@@ -777,8 +869,8 @@
                 return typeMatch && cityMatch && outMatch && e.date >= todayStr();
             });
 
-            // 按日期排序
-            filteredEvents.sort((a, b) => a.date.localeCompare(b.date));
+            // 按日期排序（同日内：关注 → 普通 → 已忽略）
+            filteredEvents.sort((a, b) => a.date.localeCompare(b.date) || followRank(a.id) - followRank(b.id));
 
             if (filteredEvents.length === 0) {
                 container.innerHTML = `
@@ -830,10 +922,13 @@
                         }
                     }
                     
+                    const st = followState(event.id);
+                    const cardName = (st === 'follow' ? '⭐ ' : '') + event.name +
+                        (st === 'ignore' ? ' <span style="font-size:10px;color:#bbb">🚫已忽略·点开可恢复</span>' : '');
                     html += `
-                        <div class="event-card" onclick="showEventDetail(${event.id})">
+                        <div class="event-card${st === 'follow' ? ' f-follow' : st === 'ignore' ? ' f-ignore' : ''}" onclick="showEventDetail(${event.id})">
                             <div class="event-card-header">
-                                <div class="event-name">${event.name}</div>
+                                <div class="event-name">${cardName}</div>
                                 <div class="event-type-badge" style="background: ${typeConfig.color}">${typeConfig.label}</div>
                             </div>
                             <div class="event-details">
@@ -844,7 +939,7 @@
                                 <div class="event-city">${event.city}</div>
                                 ${deadlineText ? `<div class="event-deadline ${deadlineClass}">⏰ ${deadlineText}</div>` : ''}
                             </div>
-                            ${event.note ? `<div style="font-size: 11px; color: #999; margin-top: 5px;">${event.note}</div>` : ''}
+                            ${event.note ? `<div class="event-note" style="font-size: 11px; color: #999; margin-top: 5px;">${event.note}</div>` : ''}
                         </div>
                     `;
                 });
@@ -1027,6 +1122,8 @@
             } else {
                 html += `<div class="event-link-button" style="background: #ccc; cursor: not-allowed;">报名链接待公布</div>`;
             }
+
+            html += followBarHtml(event);
 
             document.getElementById('eventDetailBody').innerHTML = html;
             openModal('eventModal');
