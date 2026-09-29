@@ -1,7 +1,7 @@
 // events-data.js
 // 赛事数据文件 — 由自动化脚本更新，也可手动编辑
 // 网页版 (calendar.html) 和移动版 (mobile.html) 均引用此文件
-// 更新时间: 2026-09-28
+// 更新时间: 2026-09-29
 // 覆盖范围：广东（主体）+ 周边省份（福建/广西/湖南/江西/海南/香港，note 以 🌏周边 标注）
 // 信源：最酷 zuicool / 朗途体育 / 第一赛道 / 赛客Geexek / 政府门户 / 官方微信公众号
 // 规则：仅保留比赛日 >= 2026-09-28 的赛事；月份待定用 YYYY-MM-00 占位
@@ -92,7 +92,7 @@ window.EVENTS = [
   {id:123, name:"2026澄迈半程马拉松",                        date:"2026-12-06", type:"marathon", city:"澄迈",   loc:"海南 澄迈县 老城科技新城管理委员会",          deadline:"2026-09-30 17:00",  link:"https://zuicool.com/event/89590", source:"最酷·0927", note:"🌏周边｜🔴即将截止"},
   {id:124, name:"2026珠海马拉松",                            date:"2026-12-06", type:"marathon", city:"珠海",   loc:"珠海市",                                      deadline:"待公布",            link:"https://zuicool.com/event/80085", source:"最酷", note:"已定档12/6，报名未公布"},
   {id:125, name:"2026湛江半程马拉松赛",                      date:"2026-12-06", type:"marathon", city:"湛江",   loc:"霞山区·湛江时代广场（海滨大道南）",          deadline:"2026-10-28 18:00",  link:"https://zuicool.com/event/71394", source:"最酷", note:"新增收录"},
-  {id:163, name:"2026广东万里碧道·佛山三水云东海铁人三项赛", date:"2026-12-06", type:"triathlon", city:"佛山",   loc:"三水区·云东海国家湿地公园",                    deadline:"待公布",            link:"https://www.foshan.gov.cn/zwgk/zwdt/wqdt/ssq/content/post_7224638.html", source:"佛山市政府/官宣", note:"已定档12/6（云铁3.0），报名未公布"},
+  {id:163, name:"2026广东万里碧道·佛山三水云东海铁人三项赛", date:"2026-12-06", type:"triathlon", city:"佛山",   loc:"三水区·云东海国家湿地公园",                    deadline:"2026-11-20 12:00",  link:"https://news.qq.com/rain/a/20260928A09RR100", source:"奥天国际/三水新闻", note:"9/28 12:00已开报·限1500人·早鸟10/30止：半程标铁¥498/全程¥698/113组¥1098/青少年体验¥368"},
   {id:126, name:"2026琼海博鳌马拉松",                        date:"2026-12-12", type:"marathon", city:"琼海",   loc:"海南 琼海市",                                  deadline:"待公布",            link:"https://zuicool.com/event/25040", source:"最酷·0927", note:"🌏周边｜报名未启动"},
   {id:127, name:"2026冲峰赛-广州香雪站",                     date:"2026-12-12", type:"trailrun", city:"广州",   loc:"黄埔区·萝岗香雪公园",                        deadline:"2026-09-30 18:00",  link:"https://zuicool.com/event/41338", source:"最酷", note:"🔴即将截止"},
   {id:128, name:"2026丹霞山马拉松",                          date:"2026-12-12", type:"marathon", city:"韶关",   loc:"仁化县·丹霞山",                              deadline:"待公布",            link:"https://zuicool.com/event/68035", source:"最酷/韶关文旅", note:"已定档12/12，报名未启动"},
@@ -120,7 +120,7 @@ window.EVENTS = [
   {id:150, name:"2026海口马拉松",                            date:"2026-12-27", type:"marathon", city:"海口",   loc:"海南 海口市",                                  deadline:"待公布",            link:"https://zuicool.com/event/83246", source:"最酷·0927", note:"🌏周边｜报名未启动"},
   {id:151, name:"2026海南（三亚）马拉松",                    date:"2026-12-27", type:"marathon", city:"三亚",   loc:"海南 三亚市",                                  deadline:"待公布",            link:"https://zuicool.com/event/46298", source:"最酷·0927", note:"🌏周边｜报名未启动"},
   {id:152, name:"2026左海·福州马拉松",                      date:"2026-12-27", type:"marathon", city:"福州",   loc:"福建 福州市 鼓楼区 五一广场",                 deadline:"2026-09-19 17:00",  link:"https://zuicool.com/event/76249", source:"最酷·0927", note:"🌏周边｜报名已截止（抽签缴费）"},
-  {id:153, name:"2026黄埔马拉松",                            date:"2026-12-31", type:"marathon", city:"广州",   loc:"黄埔区",                                      deadline:"待公布",            link:"https://zuicool.com/event/58617", source:"最酷", note:"部分来源称12/27，报名未启动"},
+  {id:153, name:"2026黄埔马拉松",                            date:"2026-12-24", type:"marathon", city:"广州",   loc:"黄埔区（启用新赛道）",                        deadline:"待公布",            link:"https://zuicool.com/event/58617", source:"广东台/官宣", note:"官宣12/24开跑并启用新赛道，报名未启动"},
   {id:154, name:"2026赣州马拉松",                            date:"2026-12-00", type:"marathon", city:"赣州",   loc:"江西 赣州市",                                  deadline:"待公布",            link:"https://zuicool.com/event/98495", source:"最酷·0927", note:"🌏周边｜日期待公布"},
   {id:155, name:"2026玉林马拉松",                            date:"2026-12-00", type:"marathon", city:"玉林",   loc:"广西 玉林市",                                  deadline:"待公布",            link:"https://zuicool.com/event/58057", source:"最酷·0927", note:"🌏周边｜日期待公布"},
 
