@@ -210,8 +210,8 @@
 
         .calendar-weekdays {
             display: grid;
-            /* 周一~周五压缩，周六日加宽（与 .calendar-days 一致） */
-            grid-template-columns: repeat(5, .58fr) 1.05fr 1.05fr;
+            /* 周一~五压缩至周末的 1/3（与 .calendar-days 一致） */
+            grid-template-columns: repeat(5, .5fr) 1.5fr 1.5fr;
             background: #f8f9fa;
             border-bottom: 1px solid #e0e0e0;
         }
@@ -230,7 +230,7 @@
 
         .calendar-days {
             display: grid;
-            grid-template-columns: repeat(5, .58fr) 1.05fr 1.05fr;
+            grid-template-columns: repeat(5, .5fr) 1.5fr 1.5fr;
         }
 
         .calendar-day {
@@ -703,9 +703,15 @@
         let touchStartY = 0;
         let touchEndY = 0;
 
-        // 省外快捷开关（默认显示省外赛事）
+        // 省外快捷开关（默认隐藏省外赛事；偏好与桌面版共享）
         const OUT_SET = new Set(window.OUT_PROVINCE_CITIES || []);
-        let showOut = true;
+        let PREFS = { showOut: false };
+        try { PREFS = Object.assign({ showOut: false }, JSON.parse(localStorage.getItem('gdevent.prefs') || '{}') || {}); } catch (e) { PREFS = { showOut: false }; }
+        function savePrefs() {
+            try { localStorage.setItem('gdevent.prefs', JSON.stringify(PREFS)); } catch (e) {}
+            if (followChannel) followChannel.postMessage({ type: 'prefs' });
+        }
+        let showOut = !!PREFS.showOut;
 
         // 关注 / 不关注（localStorage 持久化，与桌面版共享）
         let FOLLOWS = {};
@@ -714,19 +720,22 @@
             try { localStorage.setItem('gdevent.follows', JSON.stringify(FOLLOWS)); } catch (e) {}
             if (followChannel) followChannel.postMessage({ type: 'follows' });
         }
-        // 跨标签页同步（calendar ↔ mobile 同时打开时实时同步）
-        function reloadFollows() {
+        // 跨标签页同步（关注状态 + 显示偏好）
+        function reloadRemote() {
             try { FOLLOWS = JSON.parse(localStorage.getItem('gdevent.follows') || '{}') || {}; } catch (e) { FOLLOWS = {}; }
+            try { PREFS = Object.assign({ showOut: false }, JSON.parse(localStorage.getItem('gdevent.prefs') || '{}') || {}); } catch (e) {}
+            showOut = !!PREFS.showOut;
+            updateOutChip();
             updateStats();
             if (currentView === 'list') renderListView(); else renderCalendar();
         }
         window.addEventListener('storage', (e) => {
-            if (e.key === 'gdevent.follows' || e.key === null) reloadFollows();
+            if (e.key === 'gdevent.follows' || e.key === 'gdevent.prefs' || e.key === null) reloadRemote();
         });
         let followChannel = null;
         try {
             followChannel = new BroadcastChannel('gdevent-follows');
-            followChannel.onmessage = (ev) => { if (ev.data && ev.data.type === 'follows') reloadFollows(); };
+            followChannel.onmessage = (ev) => { if (ev.data && (ev.data.type === 'follows' || ev.data.type === 'prefs')) reloadRemote(); };
         } catch (e) { /* 老浏览器不支持时走 storage 事件 */ }
         function followState(id) { return FOLLOWS[id] || ''; }
         function followRank(id) { const s = followState(id); return s === 'follow' ? 0 : s === 'ignore' ? 2 : 1; }
@@ -817,6 +826,8 @@
             if (outChip) {
                 outChip.addEventListener('click', () => {
                     showOut = !showOut;
+                    PREFS.showOut = showOut;
+                    savePrefs();
                     updateOutChip();
                     if (currentView === 'list') renderListView();
                     else renderCalendar();
@@ -996,7 +1007,8 @@
                     const typeMatch = currentFilter === 'all' || e.type === currentFilter;
                     const cityMatch = currentCityFilter === 'all' || e.city === currentCityFilter;
                     const outMatch = showOut || !OUT_SET.has(e.city);
-                    return e.date === dateStr && typeMatch && cityMatch && outMatch;
+                    const notIgnored = followState(e.id) !== 'ignore';   // 日历：已忽略的不显示
+                    return e.date === dateStr && typeMatch && cityMatch && outMatch && notIgnored;
                 });
 
                 const dayEl = document.createElement('div');

@@ -46,8 +46,8 @@ body { font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif
 .filter-item.disabled { opacity:.35; text-decoration:line-through; }
 .filter-dot { width:7px; height:7px; border-radius:50%; flex-shrink:0; }
 
-/* ===== 日历（周一~周五压缩、周六日加宽） ===== */
-.cal-head, .cal-grid { display:grid; grid-template-columns:repeat(5, .62fr) 1.19fr 1.19fr; gap:1px; }
+/* ===== 日历（周一~周五压缩至周末的 1/3，周六日加宽） ===== */
+.cal-head, .cal-grid { display:grid; grid-template-columns:repeat(5, .5fr) 1.5fr 1.5fr; gap:1px; }
 .cal-head { padding:6px 18px 0; }
 .cal-head div { text-align:center; font-size:11px; color:var(--text2); padding:2px 0; }
 .cal-head div.wk { color:#7dd3fc; font-weight:700; }
@@ -216,6 +216,18 @@ function followBarHtml(ev) {
 const CITY_KEYS = (window.CITY_LIST || []).filter(c => !OUT_SET.has(c)).concat(['省外']);
 const OUT_KEY = '省外';
 
+/* ===== 显示偏好（省外默认隐藏；与移动版共享同一 localStorage） ===== */
+let PREFS = { showOut: false };
+try { PREFS = Object.assign({ showOut: false }, JSON.parse(localStorage.getItem('gdevent.prefs') || '{}') || {}); } catch (e) { PREFS = { showOut: false }; }
+function savePrefs() {
+  try { localStorage.setItem('gdevent.prefs', JSON.stringify(PREFS)); } catch (e) {}
+  if (followChannel) followChannel.postMessage({ type: 'prefs' });
+}
+function applyOutPref() {
+  if (PREFS.showOut) hiddenCities.delete(OUT_KEY); else hiddenCities.add(OUT_KEY);
+}
+applyOutPref();
+
 /* 本地时区的今天（YYYY-MM-DD），避免 toISOString 的时区偏移 */
 function todayStr() {
   const d = new Date();
@@ -279,28 +291,32 @@ function renderCityFilter() {
     if (!count) return;                       // 没有赛事的城市不出筛选项
     const item = document.createElement('div');
     item.className = 'filter-item' + (hiddenCities.has(city) ? ' disabled' : '');
-    item.textContent = city + count;
+    item.textContent = (city === OUT_KEY ? (hiddenCities.has(OUT_KEY) ? '🚫' : '🌏') : '') + city + count;
+    item.title = city === OUT_KEY ? '点击显示/隐藏省外赛事' : '';
     item.onclick = () => {
       hiddenCities.has(city) ? hiddenCities.delete(city) : hiddenCities.add(city);
+      if (city === OUT_KEY) { PREFS.showOut = !hiddenCities.has(OUT_KEY); savePrefs(); }
       refresh();
     };
     el.appendChild(item);
   });
 }
 
-/* ===== 跨标签页同步关注状态（calendar ↔ mobile 同时打开时实时同步） ===== */
-function reloadFollows() {
+/* ===== 跨标签页同步（关注状态 + 显示偏好） ===== */
+function syncFromStorage() {
   try { FOLLOWS = JSON.parse(localStorage.getItem('gdevent.follows') || '{}') || {}; } catch (e) { FOLLOWS = {}; }
+  try { PREFS = Object.assign({ showOut: false }, JSON.parse(localStorage.getItem('gdevent.prefs') || '{}') || {}); } catch (e) {}
+  applyOutPref();
   refresh();
   updateStats();
 }
 window.addEventListener('storage', (e) => {
-  if (e.key === 'gdevent.follows' || e.key === null) reloadFollows();
+  if (e.key === 'gdevent.follows' || e.key === 'gdevent.prefs' || e.key === null) syncFromStorage();
 });
 let followChannel = null;
 try {
   followChannel = new BroadcastChannel('gdevent-follows');
-  followChannel.onmessage = (ev) => { if (ev.data && ev.data.type === 'follows') reloadFollows(); };
+  followChannel.onmessage = (ev) => { if (ev.data && (ev.data.type === 'follows' || ev.data.type === 'prefs')) syncFromStorage(); };
 } catch (e) { /* 老浏览器不支持时走 storage 事件 */ }
 
 function refresh() {
@@ -310,8 +326,10 @@ function refresh() {
   if (document.getElementById('listView').style.display === 'block') renderListView();
 }
 
-function filteredEvents() {
-  return EVENTS.filter(e => !hiddenTypes.has(e.type) && !cityHidden(e.city));
+/* includeIgnored：列表视图传 true（忽略的赛事缩小显示），日历视图传 false（忽略的直接不显示） */
+function filteredEvents(includeIgnored) {
+  return EVENTS.filter(e => !hiddenTypes.has(e.type) && !cityHidden(e.city)
+    && (includeIgnored || followState(e.id) !== 'ignore'));
 }
 
 /* ====== 视图切换 ====== */
@@ -347,7 +365,7 @@ function renderCalendar() {
   let startDay = firstDay.getDay(); if (startDay === 0) startDay = 7; startDay--;
   const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
   const daysInPrev = new Date(currentYear, currentMonth, 0).getDate();
-  const visible = filteredEvents();
+  const visible = filteredEvents(false);   // 日历：已忽略的不显示
 
   for (let i = 0; i < 42; i++) {
     const cell = document.createElement('div');
@@ -383,14 +401,13 @@ function renderCalendar() {
     cell.appendChild(dayEl);
 
     const dayEvents = visible.filter(e => e.date === dateStr)
-      .sort((a, b) => followRank(a.id) - followRank(b.id));   // 关注在前，忽略在后
+      .sort((a, b) => followRank(a.id) - followRank(b.id));   // 关注在前
     const maxShow = isWkend ? 5 : 2;   // 周末列更宽，多显示几场
     dayEvents.slice(0, maxShow).forEach(ev => {
       const chip = document.createElement('div');
       const cls = (TYPE_MAP[ev.type] || {}).cls || '';
       const st = followState(ev.id);
-      chip.className = 'event-chip chip-' + cls +
-        (st === 'follow' ? ' f-follow' : st === 'ignore' ? ' f-ignore' : '');
+      chip.className = 'event-chip chip-' + cls + (st === 'follow' ? ' f-follow' : '');
       chip.textContent = (st === 'follow' ? '⭐' : '') + (ev.city ? ev.city + '·' : '') + ev.name;
       chip.onclick = (e) => { e.stopPropagation(); showTooltip(ev, e); };
       cell.appendChild(chip);
@@ -429,7 +446,7 @@ function showTooltip(ev, e) {
   if (ev.link) html += `<a class="tooltip-link" href="${ev.link}" target="_blank">🔗 前往报名 →</a>`;
   html += followBarHtml(ev);
   const st0 = followState(ev.id);
-  if (st0) html += `<div class="ftag" style="margin-top:5px;text-align:center">${st0 === 'follow' ? '⭐ 已关注：始终完整展示' : '🚫 已忽略：日历/列表中缩小显示'}</div>`;
+  if (st0) html += `<div class="ftag" style="margin-top:5px;text-align:center">${st0 === 'follow' ? '⭐ 已关注：完整展示并置顶' : '🚫 已忽略：日历中不再显示，列表中缩小展示（可在此撤回）'}</div>`;
   document.getElementById('tooltipContent').innerHTML = html;
   tip.classList.add('show');
   const rect = (e && e.target) ? e.target.getBoundingClientRect() : { right:200, top:200 };
@@ -469,7 +486,7 @@ document.addEventListener('click', (e) => {
 /* ====== 列表视图 ====== */
 function renderListView() {
   const el = document.getElementById('listView');
-  const visible = filteredEvents().filter(e => e.date >= todayStr());
+  const visible = filteredEvents(true).filter(e => e.date >= todayStr());   // 列表：忽略的仍显示（缩小）
   visible.sort((a, b) => a.date.localeCompare(b.date) || followRank(a.id) - followRank(b.id));
   if (visible.length === 0) {
     el.innerHTML = '<div class="empty">暂无符合条件的赛事</div>';
