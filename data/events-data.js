@@ -140,7 +140,11 @@ window.EVENTS = [
 
   // === 2026-10-12 新增 ===
   {id:171, name:"2026江门10公里联赛（蓬江站）暨亲子欢乐跑",  date:"2026-10-31", type:"roadrun",  city:"江门",  loc:"蓬江区·蓬江国际马拉松公园及滨江碧道",     deadline:"2026-10-20 18:00",  link:"https://mp.weixin.qq.com/s?__biz=Mzg3MDIwODY3OA==&mid=2247848462&idx=1&sn=408c34442b01024a814a0994cde14495", source:"江门发布/江门广电", note:"🧒含亲子组｜总3000人：10km专业组500+5km欢乐跑1500+亲子组1000·10/8开报"},
-  {id:172, name:"2026漠阳江山水画廊田园欢乐跑暨广东省职工亲子欢乐跑", date:"2026-11-08", type:"familyrun", city:"阳江", loc:"阳春市·春湾镇中山公园（春湾/合水镇）",     deadline:"2026-10-25 23:59",  link:"https://mp.weixin.qq.com/s?__biz=MzkxNDI0Mjk5NQ==&mid=2247844950&idx=1&sn=33f6d8c3f8c7f2cde60fec788d47708e", source:"阳春融媒/阳江马拉松文化", note:"🧒职工亲子｜11/8 9:00起跑·6km亲子1200人+12km专业组800人·10/11开报·先报先得"}
+  {id:172, name:"2026漠阳江山水画廊田园欢乐跑暨广东省职工亲子欢乐跑", date:"2026-11-08", type:"familyrun", city:"阳江", loc:"阳春市·春湾镇中山公园（春湾/合水镇）",     deadline:"2026-10-25 23:59",  link:"https://mp.weixin.qq.com/s?__biz=MzkxNDI0Mjk5NQ==&mid=2247844950&idx=1&sn=33f6d8c3f8c7f2cde60fec788d47708e", source:"阳春融媒/阳江马拉松文化", note:"🧒职工亲子｜11/8 9:00起跑·6km亲子1200人+12km专业组800人·10/11开报·先报先得"},
+
+  // === 2026-10-12 补录（用户指出的漏录：广州铁三 / 广州100） ===
+  {id:173, name:"2026广州铁人三项赛",                      date:"2026-11-15", type:"triathlon", city:"广州", loc:"白云区·白云湖公园东湖",                  deadline:"先报先得",          link:"https://mp.weixin.qq.com/s?__biz=MzIyNjA2ODQ1MQ==&mid=2654074065&idx=4&sn=d6999e4b3c20d8aec3e61480e5d593f5", source:"广州市体育总会/朗途体育", note:"🔥大湾区铁三盛会·10/11开报·早鸟10/31止¥698/498/368（原价全程51.5km¥1298/半程25.75km¥698/青少年体验12.2km¥498）·报名截止时间官方未公布"},
+  {id:174, name:"2027凯乐石FUGA广州100越野赛",             date:"2027-01-00", type:"trailrun", city:"广州",  loc:"广州市·路线待官宣（往届起终点在白云山/体育馆一带）", deadline:"待公布",            link:"http://www.letoursports.com/events?mid=71520", source:"朗途体育官网/广州市体育总会", note:"🔜官方已宣布定档2027年，具体日期未官宣（往届1月中旬：2026届1/17-18、5000人参赛）；官网报名通道已挂出但未开放，随时可能开启"}
 ];
 
 // 类型配置（与日历页同步）
