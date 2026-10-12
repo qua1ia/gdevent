@@ -1,7 +1,7 @@
 // events-data.js
 // 赛事数据文件 — 由自动化脚本更新，也可手动编辑
 // 网页版 (calendar.html) 和移动版 (mobile.html) 均引用此文件
-// 更新时间: 2026-10-08
+// 更新时间: 2026-10-12
 // 覆盖范围：广东（主体）+ 周边省份（福建/广西/湖南/江西/海南/香港，note 以 🌏周边 标注）
 // 信源：最酷 zuicool / 朗途体育 / 第一赛道 / 赛客Geexek / 政府门户 / 官方微信公众号
 // 规则：仅保留比赛日 >= 2026-09-28 的赛事；月份待定用 YYYY-MM-00 占位
@@ -13,7 +13,7 @@ window.EVENTS = [
   {id:54, name:"“霞客行·双世遗”FHFN·2026泰宁山水漫跑",       date:"2026-10-24", type:"roadrun",  city:"三明",   loc:"福建 三明市 泰宁县 市民广场（县政府广场）",  deadline:"2026-10-08 18:00",  link:"https://zuicool.com/event/81560", source:"最酷·0927", note:"🌏周边｜福建"},
   {id:158, name:"2026户外特工·广州山野小勇士赛岭头站",       date:"2026-10-24", type:"familyrun", city:"广州",   loc:"黄埔区·黄埔红岭头红茶创意园",                deadline:"待公布",            link:"https://mp.weixin.qq.com/s/hf1xFbQWnQl12B9P_57PMg", source:"广州山野挑战赛", note:"🧒亲子/青少年·山野探索10km+山野同行6km·约300人"},
   {id:55, name:"2026上杭中央红色交通线越野赛（溪口站）",     date:"2026-10-25", type:"trailrun", city:"龙岩",   loc:"福建 龙岩市 上杭县 溪口镇厚德公园",          deadline:"2026-09-20 16:00",  link:"https://zuicool.com/event/79725", source:"最酷·0927", note:"🌏周边｜报名已截止"},
-  {id:56, name:"嘉华2026巽寮湾半岛跑山赛",                   date:"2026-10-25", type:"trailrun", city:"惠州",   loc:"惠东·金海湾嘉华度假酒店沙滩（近磨子石公园）", deadline:"2026-10-08 23:59",  link:"https://zuicool.com/event/20967", source:"最酷", note:"🔴今日截止"},
+  {id:56, name:"嘉华2026巽寮湾半岛跑山赛",                   date:"2026-10-25", type:"trailrun", city:"惠州",   loc:"惠东·金海湾嘉华度假酒店沙滩（近磨子石公园）", deadline:"2026-10-12 23:59",  link:"https://zuicool.com/event/20967", source:"最酷", note:"🔴今日截止（已由10/8延期而来）"},
   {id:57, name:"“霞路相逢 双世泰马”2026泰宁半程马拉松",      date:"2026-10-25", type:"marathon", city:"三明",   loc:"福建 三明市 泰宁县 市民广场（县政府广场）",  deadline:"2026-09-16 17:00",  link:"https://zuicool.com/event/96681", source:"最酷·0927", note:"🌏周边｜报名已截止"},
   {id:58, name:"2026广东环云开山越野赛",                     date:"2026-10-25", type:"trailrun", city:"茂名",   loc:"信宜·平塘镇马安村广场 / 钱排镇李花谷",       deadline:"2026-09-30 23:59",  link:"https://zuicool.com/event/45459", source:"最酷", note:"🔴即将截止"},
   {id:59, name:"2026户外特工第八届广州山野挑战赛岭头站",     date:"2026-10-25", type:"trailrun", city:"广州",   loc:"黄埔·红岭头红茶创意园岭头古村",             deadline:"2026-10-09 12:00",  link:"https://zuicool.com/event/88659", source:"最酷", note:"🔴明日截止"},
@@ -39,7 +39,7 @@ window.EVENTS = [
   {id:75, name:"2026广州黄埔越野赛",                         date:"2026-11-08", type:"trailrun", city:"广州",   loc:"黄埔区·长岭国家登山健身步道",                deadline:"2026-10-08 18:00",  link:"https://zuicool.com/event/36940", source:"最酷"},
   {id:76, name:"2026 WSE 10KM OPEN 广州站",                 date:"2026-11-14", type:"roadrun",  city:"广州",   loc:"花都区·花都湖湿地公园",                      deadline:"2026-11-02 23:59",  link:"https://zuicool.com/event/62889", source:"最酷"},
   {id:77, name:"“农行杯”第十七届穿越丹霞山50公里徒步赛",     date:"2026-11-14", type:"trailrun", city:"韶关",   loc:"仁化县·丹霞山南门（阅丹公路）",              deadline:"待公布",            link:"https://m.51sai.com/16446/des",   source:"我要赛/韶关文旅", note:"徒步·穿越43km/欢乐组/亲子组"},
-  {id:78, name:"2026黄埔知识城越野赛暨户外特工广州山野挑战赛知识城站", date:"2026-11-15", type:"trailrun", city:"广州", loc:"黄埔区·九龙坊古村文创街区",              deadline:"2026-10-11 23:59",  link:"https://zuicool.com/event/81550", source:"最酷"},
+  {id:78, name:"2026黄埔知识城越野赛暨户外特工广州山野挑战赛知识城站", date:"2026-11-15", type:"trailrun", city:"广州", loc:"黄埔区·九龙坊古村文创街区",              deadline:"2026-10-29 12:00",  link:"https://zuicool.com/event/81550", source:"最酷", note:"截止时间由10/11延期至10/29"},
   {id:79, name:"2026环丹霞山自行车赛",                       date:"2026-11-15", type:"cycling",  city:"韶关",   loc:"仁化县·丹霞山",                              deadline:"待公布",            link:"https://zuicool.com/events",      source:"韶关文旅/官宣", note:"已定档，报名待公布"},
   {id:80, name:"2026桂林马拉松",                             date:"2026-11-15", type:"marathon", city:"桂林",   loc:"广西 桂林市 桂林中心广场",                    deadline:"2026-09-29 18:00",  link:"https://zuicool.com/event/90278", source:"最酷·0927", note:"🌏周边｜🔴即将截止"},
   {id:81, name:"长沙银行·2026长沙马拉松",                    date:"2026-11-15", type:"marathon", city:"长沙",   loc:"湖南 长沙市 杜甫江阁",                        deadline:"2026-08-11 17:00",  link:"https://zuicool.com/event/47412", source:"最酷·0927", note:"🌏周边｜报名已截止"},
@@ -64,7 +64,7 @@ window.EVENTS = [
   {id:98, name:"2026亚太越野跑锦标赛",                       date:"2026-11-24", type:"trailrun", city:"南平",   loc:"福建 南平市 武夷山市",                        deadline:"待公布",            link:"https://zuicool.com/event/70870", source:"最酷·0927", note:"🌏周边｜报名未启动"},
   {id:99, name:"2026第十一届大武夷超级山径赛",               date:"2026-11-28", type:"trailrun", city:"南平",   loc:"福建 南平市 武夷山市 三姑度假区月映武夷剧场", deadline:"2026-05-10 23:59",  link:"https://zuicool.com/event/35539", source:"最酷·0927", note:"🌏周边｜报名已截止"},
   {id:100, name:"2026贺州姑婆山越野赛",                      date:"2026-11-28", type:"trailrun", city:"贺州",   loc:"广西 贺州市 平桂区 姑婆山旅游度假区",         deadline:"2026-11-05 23:59",  link:"https://zuicool.com/event/72712", source:"最酷·0927", note:"🌏周边｜广西"},
-  {id:101, name:"2026广东从化一百越野赛",                    date:"2026-11-28", type:"trailrun", city:"广州",   loc:"从化区·良口镇生态设计小镇（共青路）",         deadline:"2026-10-10 23:59",  link:"https://zuicool.com/event/54272", source:"最酷", note:"广州从化一百系列"},
+  {id:101, name:"2026广东从化一百越野赛",                    date:"2026-11-28", type:"trailrun", city:"广州",   loc:"从化区·良口镇生态设计小镇（共青路）",         deadline:"2026-10-31 23:59",  link:"https://zuicool.com/event/54272", source:"最酷", note:"广州从化一百系列·截止由10/10延至10/31"},
   {id:102, name:"2026井冈山越野赛",                          date:"2026-11-28", type:"trailrun", city:"吉安",   loc:"江西 吉安市 井冈山市 井冈山景区游客服务中心", deadline:"2026-10-20 23:59",  link:"https://zuicool.com/event/94253", source:"最酷·0927", note:"🌏周边｜江西"},
   {id:103, name:"2026仙艺杯·仙游马拉松",                    date:"2026-11-29", type:"marathon", city:"莆田",   loc:"福建 莆田市 仙游县 中国古典公益博览城",       deadline:"2026-10-08 17:00",  link:"https://zuicool.com/event/40740", source:"最酷·0927", note:"🌏周边｜福建"},
   {id:104, name:"2026 WSE 10KM OPEN 海口站",                date:"2026-11-29", type:"roadrun",  city:"海口",   loc:"海南 海口市 龙华区 FUNBAY自在湾",             deadline:"2026-11-15 13:00",  link:"https://zuicool.com/event/46010", source:"最酷·0927", note:"🌏周边｜海南"},
@@ -75,11 +75,11 @@ window.EVENTS = [
   {id:109, name:"2026肇庆马拉松",                            date:"2026-11-29", type:"marathon", city:"肇庆",   loc:"端州区·七星岩牌坊广场",                      deadline:"2026-10-23 18:00",  link:"https://zuicool.com/event/38648", source:"最酷", note:"抽签11月上旬"},
   {id:110, name:"2026阳江海陵岛马拉松",                      date:"2026-11-29", type:"marathon", city:"阳江",   loc:"江城区·海陵岛螺洲海滨公园",                  deadline:"2026-11-20 18:00",  link:"https://zuicool.com/event/37382", source:"最酷", note:"广东绝美海岛马拉松"},
   {id:111, name:"龙江岁月·2026漳州半程马拉松",               date:"2026-11-29", type:"marathon", city:"漳州",   loc:"福建 漳州市 龙海区 漳州市博物馆",             deadline:"2026-10-16 18:00",  link:"https://zuicool.com/event/28718", source:"最酷·0927", note:"🌏周边｜福建"},
-  {id:112, name:"2026惠州马拉松",                            date:"2026-11-29", type:"marathon", city:"惠州",   loc:"惠州市",                                      deadline:"待公布",            link:"https://zuicool.com/event/65090", source:"最酷", note:"A类·暂定11/29，报名未启动"},
+  {id:112, name:"2026TCL惠州马拉松",                          date:"2026-12-27", type:"marathon", city:"惠州",   loc:"惠州市（市区）",                              deadline:"待公布",            link:"http://www.huizhou.cn/news/newsc_counties/newsc_hz/202610/t20261012_1663776.htm", source:"今日惠州网/惠州文旅", note:"10/12官宣定档12/27·报名未启动（抽签制）；此前暂拟11/29已作废"},
   {id:162, name:"仙乐健康·2026第八届汕头南澳越野挑战赛（澳野）", date:"2026-11-29", type:"trailrun", city:"汕头",  loc:"南澳县·后宅镇祥云广场（南澳岛，广东唯一海岛县）", deadline:"2026-10-31 23:59",  link:"https://mp.weixin.qq.com/s/j3EwqY-JA6XY6q_2K1hmLg", source:"赛客Geexek/汕头铁三协会", note:"望霞40km/观澜28km/逐秋10km·ITRA认证·1800人·早鸟10/8止"},
   {id:113, name:"2026东阳光药·东莞（松山湖）马拉松",        date:"2026-12-06", type:"marathon", city:"东莞",   loc:"松山湖·红棉路（创新科技园北门）",            deadline:"2026-10-25 16:00",  link:"https://zuicool.com/event/11596", source:"东莞发布/最酷", note:"9/28 16:00开报·12/6 7:00起跑·抽签制，结果11月上旬公布"},
   {id:114, name:"2026虎门半程马拉松",                        date:"2026-11-00", type:"marathon", city:"东莞",   loc:"东莞虎门",                                    deadline:"待公布",            link:"https://zuicool.com/event/96969", source:"最酷", note:"A类·日期待公布"},
-  {id:115, name:"2026揭阳马拉松",                            date:"2026-11-00", type:"marathon", city:"揭阳",   loc:"揭阳市",                                      deadline:"待公布",            link:"https://zuicool.com/event/95805", source:"最酷", note:"日期待公布"},
+  {id:115, name:"2026揭阳马拉松",                            date:"2026-11-29", type:"marathon", city:"揭阳",   loc:"揭阳市",                                      deadline:"待公布",            link:"http://www.jieyang.gov.cn/xwdt/jyxw/content/post_1051240.html", source:"揭阳市人民政府", note:"市政府10/9通报定档11/29·C类·报名通道即将开通"},
   {id:116, name:"2026百色半程马拉松",                        date:"2026-11-00", type:"marathon", city:"百色",   loc:"广西 百色市",                                  deadline:"待公布",            link:"https://zuicool.com/event/98749", source:"最酷·0927", note:"🌏周边｜日期待公布"},
 
   // === 2026年12月 ===
@@ -136,7 +136,11 @@ window.EVENTS = [
   {id:167, name:"2026深圳大G大利跑山赛",                     date:"2026-10-25", type:"trailrun", city:"深圳",   loc:"盐田区·恩上湿地公园",                        deadline:"2026-10-15 23:59",  link:"https://zuicool.com/event/45857", source:"最酷", note:"SALOMON GO野 × 米其林主题活动"},
   {id:168, name:"2026 KidsTrail青少年越野秋季赛",            date:"2026-10-31", type:"familyrun", city:"深圳",  loc:"宝安区·阳台山森林公园石岩登山广场",         deadline:"2026-10-19 23:59",  link:"https://zuicool.com/event/86346", source:"最酷", note:"🧒青少年越野"},
   {id:169, name:"2026 Outopia山野来赛·深圳秋季特别版",        date:"2026-11-22", type:"trailrun", city:"深圳",   loc:"南山区·塘朗山郊野公园深云广场",             deadline:"2026-11-11 23:59",  link:"https://zuicool.com/event/49863", source:"最酷"},
-  {id:170, name:"2026国际垂直马拉松总决赛广州周大福金融中心站", date:"2026-12-06", type:"roadrun",  city:"广州",  loc:"天河区·珠江东路6号 广州周大福金融中心",    deadline:"2026-11-16 12:00",  link:"https://zuicool.com/event/67371", source:"最酷", note:"垂直马拉松年度总决赛·挑战广州最高楼"}
+  {id:170, name:"2026国际垂直马拉松总决赛广州周大福金融中心站", date:"2026-12-06", type:"roadrun",  city:"广州",  loc:"天河区·珠江东路6号 广州周大福金融中心",    deadline:"2026-11-16 12:00",  link:"https://zuicool.com/event/67371", source:"最酷", note:"垂直马拉松年度总决赛·挑战广州最高楼"},
+
+  // === 2026-10-12 新增 ===
+  {id:171, name:"2026江门10公里联赛（蓬江站）暨亲子欢乐跑",  date:"2026-10-31", type:"roadrun",  city:"江门",  loc:"蓬江区·蓬江国际马拉松公园及滨江碧道",     deadline:"2026-10-20 18:00",  link:"https://mp.weixin.qq.com/s?__biz=Mzg3MDIwODY3OA==&mid=2247848462&idx=1&sn=408c34442b01024a814a0994cde14495", source:"江门发布/江门广电", note:"🧒含亲子组｜总3000人：10km专业组500+5km欢乐跑1500+亲子组1000·10/8开报"},
+  {id:172, name:"2026漠阳江山水画廊田园欢乐跑暨广东省职工亲子欢乐跑", date:"2026-11-08", type:"familyrun", city:"阳江", loc:"阳春市·春湾镇中山公园（春湾/合水镇）",     deadline:"2026-10-25 23:59",  link:"https://mp.weixin.qq.com/s?__biz=MzkxNDI0Mjk5NQ==&mid=2247844950&idx=1&sn=33f6d8c3f8c7f2cde60fec788d47708e", source:"阳春融媒/阳江马拉松文化", note:"🧒职工亲子｜11/8 9:00起跑·6km亲子1200人+12km专业组800人·10/11开报·先报先得"}
 ];
 
 // 类型配置（与日历页同步）
